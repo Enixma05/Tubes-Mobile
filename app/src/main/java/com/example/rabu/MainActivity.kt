@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
                 "Laut Bercerita",
                 "Novel karya Leila S. Chudori.",
                 45
-            )
+            ):wq
         )
 
         bukuAdapter = BukuAdapter(listBuku)
