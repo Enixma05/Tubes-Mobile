@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">RABU</string>
+    <string name="app_name">Rak Buku</string>
+    <string-array name="status_options">
+        <item>Belum dibaca</item>
+        <item>Sedang dibaca</item>
+        <item>Sudah dibaca</item>
+    </string-array>
 </resources>
