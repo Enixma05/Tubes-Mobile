@@ -11,11 +11,11 @@ class BukuAdapter(private val listBuku: List<Buku>) :
     RecyclerView.Adapter<BukuAdapter.BukuViewHolder>() {
 
     class BukuViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
         val txtJudul: TextView = itemView.findViewById(R.id.txtJudul)
         val txtDeskripsi: TextView = itemView.findViewById(R.id.txtDeskripsi)
         val progressBaca: ProgressBar = itemView.findViewById(R.id.progressBaca)
         val txtProgress: TextView = itemView.findViewById(R.id.txtProgress)
+        val txtStatus: TextView = itemView.findViewById(R.id.txtStatus)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BukuViewHolder {
@@ -27,13 +27,15 @@ class BukuAdapter(private val listBuku: List<Buku>) :
     }
 
     override fun onBindViewHolder(holder: BukuViewHolder, position: Int) {
-
         val buku = listBuku[position]
 
         holder.txtJudul.text = buku.judul
         holder.txtDeskripsi.text = buku.deskripsi
         holder.progressBaca.progress = buku.progress
         holder.txtProgress.text = "${buku.progress}% selesai"
+
+        // ← Tambahkan ini untuk badge status
+        holder.txtStatus.text = buku.status
     }
 
     override fun getItemCount(): Int {

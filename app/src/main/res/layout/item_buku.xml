@@ -6,49 +6,87 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
     app:cardCornerRadius="16dp"
-    app:cardElevation="4dp">
+    app:cardElevation="3dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="horizontal"
+        android:padding="14dp">
 
-        <TextView
-            android:id="@+id/txtJudul"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Judul Buku"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:textColor="#222222"/>
+        <!-- Ikon / Thumbnail buku -->
+        <LinearLayout
+            android:layout_width="50dp"
+            android:layout_height="70dp"
+            android:background="#EEF0FF"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📖"
+                android:textSize="28sp" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/txtDeskripsi"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Deskripsi buku"
-            android:textSize="14sp"
-            android:layout_marginTop="8dp"
-            android:textColor="#666666"/>
-
-        <ProgressBar
-            android:id="@+id/progressBaca"
-            style="?android:attr/progressBarStyleHorizontal"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="100"
-            android:progress="70"
-            android:layout_marginTop="12dp"/>
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/txtProgress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="70% selesai"
-            android:layout_marginTop="4dp"
-            android:textColor="#444444"/>
+            <TextView
+                android:id="@+id/txtJudul"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Judul Buku"
+                android:textColor="#222222"
+                android:textSize="15sp"
+                android:textStyle="bold" />
 
+            <!-- Badge status -->
+            <TextView
+                android:id="@+id/txtStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:background="@drawable/bg_badge_sedang"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:text="Sedang dibaca"
+                android:textColor="#185FA5"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/txtDeskripsi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="Deskripsi buku"
+                android:textColor="#666666"
+                android:textSize="12sp" />
+
+            <ProgressBar
+                android:id="@+id/progressBaca"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:max="100"
+                android:progress="70" />
+
+            <TextView
+                android:id="@+id/txtProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="70% selesai"
+                android:textColor="#888888"
+                android:textSize="11sp" />
+
+        </LinearLayout>
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>
