@@ -27,7 +27,19 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="#6750A4"
                 app:layout_collapseMode="pin"
-                app:navigationIcon="?attr/homeAsUpIndicator">
+                app:navigationIcon="?attr/homeAsUpIndicator"
+                app:title="">
+
+                <TextView
+                    android:id="@+id/tvToolbarTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="Deskripsi Buku"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-black" />
 
             </androidx.appcompat.widget.Toolbar>
 
@@ -104,6 +116,36 @@
                         android:text="Penerbit: -"
                         android:textSize="14sp" />
 
+                    <!-- Jumlah Halaman -->
+                    <TextView
+                        android:id="@+id/tvPages"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Jumlah Halaman: -"
+                        android:textSize="14sp" />
+
+                    <!-- Terakhir Dibaca -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:hint="Terakhir Dibaca"
+                        app:boxCollapsedPaddingTop="4dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etLastRead"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:gravity="center_vertical"
+                            android:hint="0"
+                            android:maxLines="1"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:textSize="13sp"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                                        
                     <!-- Status Dropdown -->
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
@@ -115,14 +157,15 @@
                         <AutoCompleteTextView
                             android:id="@+id/spinnerStatus"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="40dp"
                             android:inputType="none"
-                            android:padding="8dp"
+                            android:maxLines="1"
+                            android:paddingVertical="8dp"
                             android:text="Belum dibaca"
-                            android:textSize="14sp" />
+                            android:textSize="13sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Rating Row in 1 Line -->
+                    <!-- Rating and Slider Row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

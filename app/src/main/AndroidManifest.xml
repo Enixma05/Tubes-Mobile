@@ -11,15 +11,40 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.RABU">
+
+        <!-- LOGIN jadi halaman pertama -->
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
+
+        <!-- MAIN -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+        <!-- DETAIL BUKU -->
+        <activity
+            android:name=".BookDescriptionActivity"
+            android:exported="false"
+            android:label="Deskripsi Buku" />
+
+        <!-- TAMBAH BUKU -->
+        <activity
+            android:name=".AddBookActivity"
+            android:exported="false"
+            android:label="Tambah Buku" />
+
+        <activity
+            android:name="com.canhub.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
+
     </application>
 
 </manifest>

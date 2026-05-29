@@ -1,17 +1,18 @@
 package com.example.rabu
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -21,6 +22,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.edit
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.slider.Slider
 import com.google.android.material.textfield.TextInputLayout
 
@@ -35,95 +37,178 @@ class BookDescriptionActivity : AppCompatActivity() {
     private lateinit var tvRatingValue: TextView
     private lateinit var sliderRating: Slider
     private lateinit var spinnerStatus: AutoCompleteTextView
+
+    private lateinit var tvBookTitle: TextView
+    private lateinit var tvAuthor: TextView
+    private lateinit var tvGenre: TextView
     private lateinit var tvPublisherDisplay: TextView
-    
+    private lateinit var tvPages: TextView
+    private lateinit var etLastRead: EditText
+    private lateinit var tvSynopsis: TextView
+    private lateinit var ivBookCover: ImageView
+
+    private var currentBuku: Buku? = null
+    private var itemPosition: Int = -1
+
     private val prefsName = "BookPrefs"
-    private val keyNotes = "notes_content"
-    private val keyRating = "book_rating"
-    private val keyStatus = "book_status"
-    private val keyPublisher = "book_publisher"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_book_description)
 
-        // Setup Toolbar
+        // Toolbar
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
+
+        supportActionBar?.setDisplayShowTitleEnabled(false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         toolbar.setNavigationOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
+            finishWithResult()
         }
 
-        // Setup Slider Rating
+        // Inisialisasi View
+        tvBookTitle = findViewById(R.id.tvBookTitle)
+        tvAuthor = findViewById(R.id.tvAuthor)
+        tvGenre = findViewById(R.id.tvGenre)
+        tvPublisherDisplay = findViewById(R.id.tvPublisher)
+        tvPages = findViewById(R.id.tvPages)
+        etLastRead = findViewById(R.id.etLastRead)
+        tvSynopsis = findViewById(R.id.tvSynopsis)
         tvRatingValue = findViewById(R.id.tvRatingValue)
         sliderRating = findViewById(R.id.sliderRating)
-
-        // Setup Dropdown Status
-        val statusOptions = resources.getStringArray(R.array.status_options)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, statusOptions)
         spinnerStatus = findViewById(R.id.spinnerStatus)
-        spinnerStatus.setAdapter(adapter)
-
-        spinnerStatus.setOnItemClickListener { parent, _, position, _ ->
-            val selectedStatus = parent.getItemAtPosition(position).toString()
-            saveStatus(selectedStatus)
-            
-            if (selectedStatus == "Belum dibaca") {
-                sliderRating.value = 0f
-                sliderRating.isEnabled = false
-                tvRatingValue.text = "Rating: 0/10"
-                saveRating(0f)
-            } else {
-                sliderRating.isEnabled = true
-            }
-        }
-
-        sliderRating.addOnChangeListener { _, value, _ ->
-            val rating = value.toInt()
-            tvRatingValue.text = "Rating: $rating/10"
-            saveRating(value)
-        }
-
-        // Setup Views
         etNotes = findViewById(R.id.etNotes)
         tilNotes = findViewById(R.id.tilNotes)
         tvNoteStatus = findViewById(R.id.tvNoteStatus)
         btnSaveNotes = findViewById(R.id.btnSaveNotes)
         btnDeleteNotes = findViewById(R.id.btnDeleteNotes)
         llNoteActions = findViewById(R.id.llNoteActions)
-        tvPublisherDisplay = findViewById(R.id.tvPublisher)
+        ivBookCover = findViewById(R.id.ivBookCover)
 
-        // Load existing data
-        loadSavedData()
+        // Ambil data buku
+        itemPosition = intent.getIntExtra("EXTRA_POSITION", -1)
 
-        etNotes.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            
-            override fun afterTextChanged(s: Editable?) {
-                handleDraftStatus()
+        currentBuku =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getSerializableExtra(
+                    "EXTRA_BUKU",
+                    Buku::class.java
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getSerializableExtra("EXTRA_BUKU") as? Buku
             }
-        })
 
+        currentBuku?.let { buku ->
+
+            tvBookTitle.text = buku.judul
+            tvAuthor.text = "Penulis: ${buku.author}"
+            tvGenre.text = "Genre: ${buku.genre}"
+            tvPublisherDisplay.text = "Penerbit: ${buku.penerbit}"
+            tvPages.text = "Jumlah Halaman: ${buku.jumlahHalaman}"
+            tvSynopsis.text = buku.deskripsi
+
+            // Cover
+            if (!buku.coverUri.isNullOrEmpty()) {
+                ivBookCover.setImageURI(Uri.parse(buku.coverUri))
+                ivBookCover.setPadding(0, 0, 0, 0)
+            } else {
+                ivBookCover.setImageResource(
+                    android.R.drawable.ic_menu_gallery
+                )
+                ivBookCover.setPadding(
+                    30,
+                    30,
+                    30,
+                    30
+                )
+            }
+
+            loadSavedData(buku.judul)
+        }
+
+        // Auto save terakhir dibaca
+        etLastRead.doAfterTextChanged { text ->
+
+            val lastRead = text.toString()
+
+            currentBuku = currentBuku?.copy(
+                terakhirDibaca = lastRead
+            )
+
+            saveLastRead(
+                currentBuku?.judul ?: "",
+                lastRead
+            )
+        }
+
+        // Dropdown status
+        val statusOptions = arrayOf(
+            "Belum dibaca",
+            "Sedang dibaca",
+            "Sudah dibaca"
+        )
+
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            statusOptions
+        )
+
+        spinnerStatus.setAdapter(adapter)
+
+        spinnerStatus.setOnItemClickListener { parent, _, position, _ ->
+
+            val selectedStatus =
+                parent.getItemAtPosition(position).toString()
+
+            currentBuku = currentBuku?.copy(
+                status = selectedStatus
+            )
+
+            saveStatus(
+                currentBuku?.judul ?: "",
+                selectedStatus
+            )
+
+            sliderRating.isEnabled =
+                selectedStatus != "Belum dibaca"
+
+            if (selectedStatus == "Belum dibaca") {
+                sliderRating.value = 0f
+                tvRatingValue.text = "Rating: 0/10"
+
+                saveRating(
+                    currentBuku?.judul ?: "",
+                    0f
+                )
+            }
+        }
+
+        // Rating
+        sliderRating.addOnChangeListener { _, value, _ ->
+
+            tvRatingValue.text =
+                "Rating: ${value.toInt()}/10"
+
+            saveRating(
+                currentBuku?.judul ?: "",
+                value
+            )
+        }
+
+        // Catatan
         btnSaveNotes.setOnClickListener {
-            val currentStatus = btnSaveNotes.text.toString()
-            when (currentStatus) {
-                "Edit" -> {
-                    setEditMode(true)
-                    tvNoteStatus.text = "Mengedit..."
-                    etNotes.requestFocus()
-                    etNotes.setSelection(etNotes.text.length)
-                }
-                "Tambahkan catatan" -> {
-                    setEditMode(true)
-                    tvNoteStatus.text = "Menulis..."
-                    etNotes.requestFocus()
-                }
-                "Simpan" -> {
-                    saveNotes()
-                    hideKeyboard()
-                }
+
+            if (
+                btnSaveNotes.text == "Tambahkan catatan"
+                || btnSaveNotes.text == "Edit"
+            ) {
+                setEditMode(true)
+            } else {
+                saveNotes()
+                hideKeyboard()
             }
         }
 
@@ -131,156 +216,328 @@ class BookDescriptionActivity : AppCompatActivity() {
             showDeleteConfirmationDialog()
         }
 
-        // Penerbit dibuat tidak bisa diklik/diedit sesuai permintaan
         tvPublisherDisplay.isClickable = false
         tvPublisherDisplay.isFocusable = false
     }
 
-    private fun handleDraftStatus() {
-        val currentNotes = etNotes.text.toString().trim()
-        val sharedPref = getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-        val savedNotes = sharedPref.getString(keyNotes, "") ?: ""
-        
-        if (tilNotes.isVisible && etNotes.isEnabled) {
-            if (currentNotes != savedNotes) {
-                tvNoteStatus.text = "Draft (Belum disimpan)"
-                tvNoteStatus.setTextColor(Color.RED)
-                btnSaveNotes.text = "Simpan"
-                updateButtonLayout(false)
-            } else if (savedNotes.isNotEmpty()) {
-                tvNoteStatus.text = "Tersimpan"
-                tvNoteStatus.setTextColor(Color.parseColor("#4CAF50"))
-                btnSaveNotes.text = "Edit"
-                updateButtonLayout(false)
-            }
-        }
+    private fun finishWithResult() {
+        val intent = Intent()
+        intent.putExtra(
+            "UPDATED_BUKU",
+            currentBuku
+        )
+        intent.putExtra(
+            "EXTRA_POSITION",
+            itemPosition
+        )
+        setResult(RESULT_OK, intent)
+        finish()
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        finishWithResult()
     }
 
     private fun setEditMode(editable: Boolean) {
         tilNotes.isVisible = true
         etNotes.isEnabled = editable
-        btnSaveNotes.text = if (editable) "Simpan" else "Edit"
+        btnSaveNotes.text =
+            if (editable) "Simpan" else "Edit"
+
         updateButtonLayout(false)
-        if (editable) showKeyboard(etNotes)
-    }
 
-    private fun saveRating(rating: Float) {
-        getSharedPreferences(prefsName, Context.MODE_PRIVATE).edit {
-            putFloat(keyRating, rating)
+        if (editable) {
+            showKeyboard(etNotes)
         }
     }
 
-    private fun saveStatus(status: String) {
-        getSharedPreferences(prefsName, Context.MODE_PRIVATE).edit {
-            putString(keyStatus, status)
+    private fun saveRating(
+        bookTitle: String,
+        rating: Float
+    ) {
+        getSharedPreferences(
+            prefsName,
+            Context.MODE_PRIVATE
+        ).edit {
+            putFloat(
+                "${bookTitle}_rating",
+                rating
+            )
         }
     }
 
-    private fun updateButtonLayout(isInitialAddMode: Boolean) {
-        val params = btnSaveNotes.layoutParams as LinearLayout.LayoutParams
-        if (isInitialAddMode) {
-            llNoteActions.gravity = Gravity.START
-            params.width = LinearLayout.LayoutParams.MATCH_PARENT
-            btnSaveNotes.minWidth = 0
-        } else {
-            llNoteActions.gravity = Gravity.END
-            params.width = (110 * resources.displayMetrics.density).toInt()
-            btnSaveNotes.minWidth = params.width
+    private fun saveStatus(
+        bookTitle: String,
+        status: String
+    ) {
+        getSharedPreferences(
+            prefsName,
+            Context.MODE_PRIVATE
+        ).edit {
+            putString(
+                "${bookTitle}_status",
+                status
+            )
         }
-        btnSaveNotes.layoutParams = params
     }
 
-    private fun showDeleteConfirmationDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Hapus Catatan")
-            .setMessage("Apakah Anda yakin ingin menghapus catatan ini?")
-            .setPositiveButton("Hapus") { _, _ ->
-                deleteNotes()
-            }
-            .setNegativeButton("Batal", null)
-            .show()
-    }
-
-    private fun getSavedNotesContent(): String? {
-        val sharedPref = getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-        return sharedPref.getString(keyNotes, null)
+    private fun saveLastRead(
+        bookTitle: String,
+        lastRead: String
+    ) {
+        getSharedPreferences(
+            prefsName,
+            Context.MODE_PRIVATE
+        ).edit {
+            putString(
+                "${bookTitle}_last_read",
+                lastRead
+            )
+        }
     }
 
     private fun saveNotes() {
-        val notes = etNotes.text.toString().trim()
-        if (notes.isNotEmpty()) {
-            getSharedPreferences(prefsName, Context.MODE_PRIVATE).edit {
-                putString(keyNotes, notes)
-            }
-            updateUiState(true)
-            Toast.makeText(this, "Catatan disimpan!", Toast.LENGTH_SHORT).show()
+
+        val notes =
+            etNotes.text.toString().trim()
+
+        val title =
+            currentBuku?.judul ?: ""
+
+        getSharedPreferences(
+            prefsName,
+            Context.MODE_PRIVATE
+        ).edit {
+            putString(
+                "${title}_notes",
+                notes
+            )
         }
+
+        updateUiState(
+            notes.isNotEmpty()
+        )
+
+        Toast.makeText(
+            this,
+            "Catatan disimpan!",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
-    private fun deleteNotes() {
-        getSharedPreferences(prefsName, Context.MODE_PRIVATE).edit {
-            remove(keyNotes)
-        }
-        etNotes.setText("")
-        updateUiState(false)
-        Toast.makeText(this, "Catatan dihapus", Toast.LENGTH_SHORT).show()
+    private fun loadSavedData(
+        bookTitle: String
+    ) {
+
+        val sharedPref =
+            getSharedPreferences(
+                prefsName,
+                Context.MODE_PRIVATE
+            )
+
+        // Status
+        val savedStatus =
+            sharedPref.getString(
+                "${bookTitle}_status",
+                currentBuku?.status
+                    ?: "Belum dibaca"
+            )
+
+        spinnerStatus.setText(
+            savedStatus,
+            false
+        )
+
+        currentBuku =
+            currentBuku?.copy(
+                status = savedStatus!!
+            )
+
+        // Rating
+        sliderRating.isEnabled =
+            savedStatus != "Belum dibaca"
+
+        val savedRating =
+            sharedPref.getFloat(
+                "${bookTitle}_rating",
+                0f
+            )
+
+        sliderRating.value =
+            savedRating
+
+        tvRatingValue.text =
+            "Rating: ${savedRating.toInt()}/10"
+
+        // Last Read
+        val savedLastRead =
+            sharedPref.getString(
+                "${bookTitle}_last_read",
+                currentBuku?.terakhirDibaca ?: ""
+            ) ?: ""
+
+        etLastRead.setText(
+            savedLastRead
+        )
+
+        currentBuku =
+            currentBuku?.copy(
+                terakhirDibaca =
+                    savedLastRead
+            )
+
+        // Notes
+        val savedNotes =
+            sharedPref.getString(
+                "${bookTitle}_notes",
+                ""
+            ) ?: ""
+
+        etNotes.setText(
+            savedNotes
+        )
+
+        updateUiState(
+            savedNotes.isNotEmpty()
+        )
     }
 
-    private fun loadSavedData() {
-        val sharedPref = getSharedPreferences(prefsName, Context.MODE_PRIVATE)
-        
-        val savedStatus = sharedPref.getString(keyStatus, "Belum dibaca")
-        spinnerStatus.setText(savedStatus, false)
-        sliderRating.isEnabled = (savedStatus != "Belum dibaca")
+    private fun updateUiState(
+        hasNotes: Boolean
+    ) {
 
-        val savedRating = sharedPref.getFloat(keyRating, 0f)
-        sliderRating.value = if (savedStatus == "Belum dibaca") 0f else savedRating
-        tvRatingValue.text = "Rating: ${sliderRating.value.toInt()}/10"
-
-        val publisherValue = sharedPref.getString(keyPublisher, "Nama Penerbit (Tahun)")
-        tvPublisherDisplay.text = "Penerbit: $publisherValue"
-
-        val savedNotes = sharedPref.getString(keyNotes, null)
-        etNotes.setText(savedNotes)
-
-        if (!savedNotes.isNullOrEmpty()) {
-            updateUiState(true)
-        } else {
-            updateUiState(false)
-        }
-    }
-
-    private fun updateUiState(hasNotes: Boolean) {
         if (hasNotes) {
+
             tilNotes.isVisible = true
             etNotes.isEnabled = false
-            tvNoteStatus.text = "Tersimpan"
-            tvNoteStatus.setTextColor(Color.parseColor("#4CAF50"))
-            btnSaveNotes.text = "Edit"
-            btnDeleteNotes.isVisible = true
+
+            tvNoteStatus.text =
+                "Tersimpan"
+
+            tvNoteStatus.setTextColor(
+                Color.parseColor(
+                    "#4CAF50"
+                )
+            )
+
+            btnSaveNotes.text =
+                "Edit"
+
+            btnDeleteNotes.isVisible =
+                true
+
             updateButtonLayout(false)
+
         } else {
+
             tilNotes.isGone = true
-            etNotes.isEnabled = true
-            tvNoteStatus.text = "Belum ada catatan"
-            tvNoteStatus.setTextColor(Color.GRAY)
-            btnSaveNotes.text = "Tambahkan catatan"
-            btnDeleteNotes.isGone = true
+
+            tvNoteStatus.text =
+                "Belum ada catatan"
+
+            btnSaveNotes.text =
+                "Tambahkan catatan"
+
+            btnDeleteNotes.isGone =
+                true
+
             updateButtonLayout(true)
         }
     }
 
-    private fun showKeyboard(view: View) {
+    private fun updateButtonLayout(
+        isInitialAddMode: Boolean
+    ) {
+
+        val params =
+            btnSaveNotes.layoutParams
+                    as LinearLayout.LayoutParams
+
+        val density =
+            resources.displayMetrics.density
+
+        if (isInitialAddMode) {
+            params.width =
+                LinearLayout.LayoutParams.MATCH_PARENT
+        } else {
+            params.width =
+                (110 * density).toInt()
+        }
+
+        btnSaveNotes.layoutParams =
+            params
+    }
+
+    private fun showDeleteConfirmationDialog() {
+
+        AlertDialog.Builder(this)
+            .setTitle(
+                "Hapus Catatan"
+            )
+            .setMessage(
+                "Yakin ingin menghapus?"
+            )
+            .setPositiveButton(
+                "Hapus"
+            ) { _, _ ->
+
+                val title =
+                    currentBuku?.judul ?: ""
+
+                getSharedPreferences(
+                    prefsName,
+                    Context.MODE_PRIVATE
+                ).edit {
+                    remove(
+                        "${title}_notes"
+                    )
+                }
+
+                etNotes.setText("")
+
+                updateUiState(false)
+            }
+            .setNegativeButton(
+                "Batal",
+                null
+            )
+            .show()
+    }
+
+    private fun showKeyboard(
+        view: View
+    ) {
+
         view.requestFocus()
-        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+
+        val imm =
+            getSystemService(
+                Context.INPUT_METHOD_SERVICE
+            ) as InputMethodManager
+
+        imm.showSoftInput(
+            view,
+            InputMethodManager.SHOW_IMPLICIT
+        )
     }
 
     private fun hideKeyboard() {
-        val view = currentFocus
+
+        val view =
+            currentFocus
+
         if (view != null) {
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(view.windowToken, 0)
+
+            val imm =
+                getSystemService(
+                    Context.INPUT_METHOD_SERVICE
+                ) as InputMethodManager
+
+            imm.hideSoftInputFromWindow(
+                view.windowToken,
+                0
+            )
         }
     }
 }
