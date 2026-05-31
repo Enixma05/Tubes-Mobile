@@ -47,7 +47,7 @@
                     android:layout_gravity="center_horizontal"
                     android:text="Cover Buku"
                     android:textStyle="bold"
-                    android:textColor="@color/black"
+                    android:textColor="@color/app_text_main"
                     android:textSize="16sp"
                     android:layout_marginBottom="12dp"/>
 

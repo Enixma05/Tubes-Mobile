@@ -1,5 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#000000</color>
+
+    <!-- Fox Orange Palette -->
+    <color name="primary_orange">#FF6B00</color>
+    <color name="primary_orange_dark">#E65100</color>
+    <color name="primary_orange_light">#FFB74D</color>
+    <color name="fox_logo_tint">#FFB74D</color>
+
+    <!-- Light Theme -->
+    <color name="app_background">#FFFFFF</color>
+    <color name="app_surface">#F5F5F5</color>
+
+    <!-- FIX: samakan nama biar tidak duplicate error -->
+    <color name="app_text_main">#212121</color>
+    <color name="app_text_secondary">#757575</color>
+
     <color name="white">#FFFFFF</color>
-    <color name="primary">#5E72E4</color>
+    <color name="black">#000000</color>
+
 </resources>

@@ -38,7 +38,7 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.recyclerview)
-    implementation(libs.android.image.cropper)
+    implementation("com.github.CanHub:Android-Image-Cropper:4.3.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

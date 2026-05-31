@@ -2,7 +2,6 @@ package com.example.rabu
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -114,15 +113,8 @@ class BookDescriptionActivity : AppCompatActivity() {
                 ivBookCover.setImageURI(Uri.parse(buku.coverUri))
                 ivBookCover.setPadding(0, 0, 0, 0)
             } else {
-                ivBookCover.setImageResource(
-                    android.R.drawable.ic_menu_gallery
-                )
-                ivBookCover.setPadding(
-                    30,
-                    30,
-                    30,
-                    30
-                )
+                ivBookCover.setImageResource(android.R.drawable.ic_menu_gallery)
+                ivBookCover.setPadding(30, 30, 30, 30)
             }
 
             loadSavedData(buku.judul)
@@ -144,11 +136,7 @@ class BookDescriptionActivity : AppCompatActivity() {
         }
 
         // Dropdown status
-        val statusOptions = arrayOf(
-            "Belum dibaca",
-            "Sedang dibaca",
-            "Sudah dibaca"
-        )
+        val statusOptions = resources.getStringArray(R.array.status_options)
 
         val adapter = ArrayAdapter(
             this,
@@ -337,17 +325,14 @@ class BookDescriptionActivity : AppCompatActivity() {
             )
 
         // Status
-        val savedStatus =
-            sharedPref.getString(
-                "${bookTitle}_status",
-                currentBuku?.status
-                    ?: "Belum dibaca"
-            )
+        val statusOptions = resources.getStringArray(R.array.status_options)
 
-        spinnerStatus.setText(
-            savedStatus,
-            false
+        val savedStatus = sharedPref.getString(
+            "${bookTitle}_status",
+            statusOptions[0]
         )
+
+        spinnerStatus.setText(savedStatus, false)
 
         currentBuku =
             currentBuku?.copy(
@@ -416,9 +401,7 @@ class BookDescriptionActivity : AppCompatActivity() {
                 "Tersimpan"
 
             tvNoteStatus.setTextColor(
-                Color.parseColor(
-                    "#4CAF50"
-                )
+                getColor(android.R.color.holo_green_dark)
             )
 
             btnSaveNotes.text =

@@ -2,7 +2,16 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.RABU" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/primary_orange</item>
+        <item name="colorPrimaryVariant">@color/primary_orange_dark</item>
+        <item name="colorSecondary">@color/primary_orange_light</item>
+
+        <!-- Status Bar -->
+        <item name="android:statusBarColor">@color/app_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+        <!-- Background and Surface -->
+        <item name="android:windowBackground">@color/app_background</item>
     </style>
 
     <style name="Theme.RABU" parent="Base.Theme.RABU" />
