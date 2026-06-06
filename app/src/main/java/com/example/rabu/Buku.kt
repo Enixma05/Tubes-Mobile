@@ -6,11 +6,11 @@ data class Buku(
     val judul: String,
     val author: String,
     val penerbit: String,
-    val jumlahHalaman: Int = 0,
+    val jumlahHalaman: Int,
     val genre: String,
     val deskripsi: String,
     val progress: Int,
     val status: String,
-    val terakhirDibaca: String = "",
-    val coverUri: String? = null
+    val halamanTerakhir: String,
+    val coverUri: String?
 ) : Serializable

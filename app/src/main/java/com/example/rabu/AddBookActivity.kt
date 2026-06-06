@@ -57,7 +57,6 @@ class AddBookActivity : AppCompatActivity() {
         }
 
         btnSubmit.setOnClickListener {
-
             val title = etTitle.text.toString().trim()
             val author = etAuthor.text.toString().trim()
             val publisher = etPublisher.text.toString().trim()
@@ -71,19 +70,17 @@ class AddBookActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // ✅ FIX ARRAY STATUS
-            val statusOptions = resources.getStringArray(R.array.status_options)
-
+            // Buku baru otomatis 0% dan "Belum dibaca"
             val newBook = Buku(
                 judul = title,
                 author = author,
-                penerbit = "$publisher ($year)",
+                penerbit = if (year.isNotEmpty()) "$publisher ($year)" else publisher,
                 jumlahHalaman = pages,
                 genre = genre,
                 deskripsi = synopsis,
                 progress = 0,
-                status = statusOptions[0], // default: Belum dibaca
-                terakhirDibaca = "",
+                status = "Belum dibaca",
+                halamanTerakhir = "0",
                 coverUri = selectedImageUri?.toString()
             )
 
@@ -101,9 +98,6 @@ class AddBookActivity : AppCompatActivity() {
             guidelines = CropImageView.Guidelines.ON
             cropMenuCropButtonTitle = "OK"
         }
-
-        cropImage.launch(
-            CropImageContractOptions(null, options)
-        )
+        cropImage.launch(CropImageContractOptions(null, options))
     }
 }

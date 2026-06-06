@@ -29,7 +29,10 @@ class SettingsActivity : AppCompatActivity() {
         // Pengaturan Tema
         val rgThemeMode = findViewById<RadioGroup>(R.id.rgThemeMode)
         val appPrefs = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
-        val savedTheme = appPrefs.getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        val session = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+        val currentUser = session.getString("current_user", "User") ?: "User"
+        
+        val savedTheme = appPrefs.getInt("theme_mode_$currentUser", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
         when (savedTheme) {
             AppCompatDelegate.MODE_NIGHT_NO -> rgThemeMode.check(R.id.rbThemeLight)
@@ -43,7 +46,7 @@ class SettingsActivity : AppCompatActivity() {
                 R.id.rbThemeDark -> AppCompatDelegate.MODE_NIGHT_YES
                 else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             }
-            appPrefs.edit().putInt("theme_mode", mode).apply()
+            appPrefs.edit().putInt("theme_mode_$currentUser", mode).apply()
             AppCompatDelegate.setDefaultNightMode(mode)
         }
 

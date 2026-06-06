@@ -57,7 +57,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="Judul Buku"
-                android:textColor="#222222"
+                android:textColor="@color/app_text_main"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -81,7 +81,7 @@
                 android:ellipsize="end"
                 android:maxLines="2"
                 android:text="Deskripsi buku"
-                android:textColor="#666666"
+                android:textColor="@color/app_text_secondary"
                 android:textSize="12sp" />
 
             <ProgressBar
@@ -91,7 +91,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:max="100"
-                android:progress="70" />
+                android:progressTint="@color/primary_orange" />
 
             <TextView
                 android:id="@+id/txtProgress"
@@ -99,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
                 android:text="70% selesai"
-                android:textColor="#888888"
+                android:textColor="@color/app_text_secondary"
                 android:textSize="11sp" />
         </LinearLayout>
     </RelativeLayout>

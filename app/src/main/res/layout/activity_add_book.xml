@@ -4,27 +4,35 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/app_background"
+    android:fitsSystemWindows="true"
     tools:context=".AddBookActivity">
 
+    <!-- Header Orange Solid - liftOnScroll="false" & stateListAnimator="@null" menjaga warna tetap solid -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#5E72E4">
+        android:background="@color/primary_orange"
+        app:liftOnScroll="false"
+        app:elevation="0dp"
+        android:stateListAnimator="@null">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarAddBook"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="@color/primary_orange"
             app:title="Tambah Buku Baru"
             app:titleTextColor="@color/white"
-            app:navigationIcon="?attr/homeAsUpIndicator" />
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:navigationIconTint="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -56,7 +64,8 @@
                     android:layout_width="140dp"
                     android:layout_height="200dp"
                     app:cardCornerRadius="12dp"
-                    app:cardElevation="6dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/app_surface"
                     android:clickable="true"
                     android:focusable="true"
                     android:foreground="?attr/selectableItemBackground">
@@ -67,7 +76,7 @@
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                         android:src="@android:drawable/ic_menu_gallery"
-                        android:background="#F8F9FE"
+                        android:background="@color/app_surface"
                         android:padding="50dp" />
                 </androidx.cardview.widget.CardView>
 
@@ -76,7 +85,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Klik untuk pilih foto"
-                    android:textColor="#5E72E4"
+                    android:textColor="@color/primary_orange"
                     android:textSize="13sp"
                     android:layout_marginTop="12dp"/>
             </LinearLayout>
@@ -87,12 +96,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="Judul Buku"
-                app:startIconDrawable="@android:drawable/ic_menu_edit">
+                app:boxStrokeColor="@color/primary_orange"
+                app:hintTextColor="@color/primary_orange"
+                app:startIconDrawable="@android:drawable/ic_menu_edit"
+                app:startIconTint="@color/primary_orange">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAddTitle"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/app_text_main" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -100,13 +113,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Author (Penulis)"
-                app:startIconDrawable="@android:drawable/ic_menu_myplaces">
+                android:hint="Penulis"
+                app:boxStrokeColor="@color/primary_orange"
+                app:hintTextColor="@color/primary_orange"
+                app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+                app:startIconTint="@color/primary_orange">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAddAuthor"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/app_text_main" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -114,13 +131,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Nama Penerbit"
-                app:startIconDrawable="@android:drawable/ic_menu_edit">
+                android:hint="Penerbit"
+                app:boxStrokeColor="@color/primary_orange"
+                app:hintTextColor="@color/primary_orange"
+                app:startIconDrawable="@android:drawable/ic_menu_edit"
+                app:startIconTint="@color/primary_orange">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAddPublisher"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/app_text_main" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -129,13 +150,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="Tahun Terbit"
-                app:startIconDrawable="@android:drawable/ic_menu_my_calendar">
+                app:boxStrokeColor="@color/primary_orange"
+                app:hintTextColor="@color/primary_orange"
+                app:startIconDrawable="@android:drawable/ic_menu_my_calendar"
+                app:startIconTint="@color/primary_orange">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAddYear"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="number" />
+                    android:inputType="number"
+                    android:textColor="@color/app_text_main" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -144,13 +169,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="Jumlah Halaman"
-                app:startIconDrawable="@android:drawable/ic_menu_agenda">
+                app:boxStrokeColor="@color/primary_orange"
+                app:hintTextColor="@color/primary_orange"
+                app:startIconDrawable="@android:drawable/ic_menu_agenda"
+                app:startIconTint="@color/primary_orange">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAddPages"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="number"/>
+                    android:inputType="number"
+                    android:textColor="@color/app_text_main" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -159,12 +188,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="Genre"
-                app:startIconDrawable="@android:drawable/ic_menu_gallery">
+                app:boxStrokeColor="@color/primary_orange"
+                app:hintTextColor="@color/primary_orange"
+                app:startIconDrawable="@android:drawable/ic_menu_gallery"
+                app:startIconTint="@color/primary_orange">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAddGenre"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/app_text_main" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -173,7 +206,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
                 android:hint="Sinopsis"
-                app:startIconDrawable="@android:drawable/ic_menu_sort_by_size">
+                app:boxStrokeColor="@color/primary_orange"
+                app:hintTextColor="@color/primary_orange"
+                app:startIconDrawable="@android:drawable/ic_menu_sort_by_size"
+                app:startIconTint="@color/primary_orange">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAddSynopsis"
@@ -181,14 +217,15 @@
                     android:layout_height="wrap_content"
                     android:gravity="top"
                     android:inputType="textMultiLine"
-                    android:minLines="4" />
+                    android:minLines="4"
+                    android:textColor="@color/app_text_main" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSubmitAdd"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:backgroundTint="#5E72E4"
+                android:backgroundTint="@color/primary_orange"
                 android:text="Simpan Buku"
                 android:textAllCaps="false"
                 android:textSize="16sp"

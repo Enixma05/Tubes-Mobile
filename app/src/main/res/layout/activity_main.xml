@@ -12,7 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/primary_orange"
-        app:elevation="0dp">
+        app:elevation="0dp"
+        app:liftOnScroll="false"
+        app:liftOnScrollColor="@color/primary_orange"
+        android:stateListAnimator="@null">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -58,23 +61,52 @@
             android:orientation="vertical"
             android:paddingBottom="80dp">
 
-            <!-- Search Bar -->
-            <EditText
-                android:id="@+id/etSearch"
+            <!-- Search Bar & Sort -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:layout_margin="16dp"
-                android:background="@drawable/bg_search"
-                android:drawableStart="@android:drawable/ic_menu_search"
-                android:drawablePadding="8dp"
-                android:hint="Cari buku..."
-                android:paddingHorizontal="12dp"
-                android:textColor="#333333"
-                android:textColorHint="#99333333"
-                android:textSize="14sp"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:gravity="center_vertical"/>
+                android:gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/etSearch"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_search"
+                    android:drawableStart="@android:drawable/ic_menu_search"
+                    android:drawablePadding="8dp"
+                    android:hint="Cari buku..."
+                    android:paddingHorizontal="12dp"
+                    android:textColor="@color/app_text_main"
+                    android:textColorHint="#99333333"
+                    android:textSize="14sp"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:gravity="center_vertical"/>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/btnSort"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@color/app_surface"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@android:drawable/arrow_down_float"
+                        app:tint="@color/primary_orange" />
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
 
             <!-- STATS ROW -->
             <LinearLayout

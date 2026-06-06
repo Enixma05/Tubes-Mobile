@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -23,6 +24,11 @@ class LoginActivity : AppCompatActivity() {
         // Cek sesi login otomatis
         val session = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
         if (session.getBoolean("is_logged_in", false)) {
+            val user = session.getString("current_user", "User") ?: "User"
+            val themeMode = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+                .getInt("theme_mode_$user", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            AppCompatDelegate.setDefaultNightMode(themeMode)
+            
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
@@ -62,36 +68,52 @@ class LoginActivity : AppCompatActivity() {
 
             if (isLoginMode) {
                 // Logika LOGIN
-                val registeredUser = userPrefs.getString("reg_username", null)
-                val registeredPass = userPrefs.getString("reg_password", null)
+                val registeredPass = userPrefs.getString("password_$user", null)
 
-                if (registeredUser == null) {
-                    Toast.makeText(this, "Akun tidak ditemukan. Silakan daftar dulu.", Toast.LENGTH_SHORT).show()
-                } else if (user == registeredUser && pass == registeredPass) {
-                    session.edit { putBoolean("is_logged_in", true) }
+                if (registeredPass == null) {
+                    Toast.makeText(
+                        this,
+                        "Akun tidak ditemukan. Silakan daftar dulu.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                } else if (pass == registeredPass) {
+
+                    session.edit {
+                        putBoolean("is_logged_in", true)
+                        putString("current_user", user)
+                    }
+
+                    // Terapkan tema user
+                    val themeMode = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+                        .getInt("theme_mode_$user", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                    AppCompatDelegate.setDefaultNightMode(themeMode)
+
                     Toast.makeText(this, "Login Berhasil", Toast.LENGTH_SHORT).show()
+
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
+
                 } else {
-                    Toast.makeText(this, "Username atau Password Salah", Toast.LENGTH_SHORT).show()
+
+                    Toast.makeText(
+                        this,
+                        "Password salah",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
+
             } else {
                 // Logika DAFTAR (Sign In)
-                val registeredUser = userPrefs.getString("reg_username", null)
-                val registeredPass = userPrefs.getString("reg_password", null)
-                
-                // Validasi: Tidak boleh menggunakan username yang sudah ada
-                if (user == registeredUser) {
-                    Toast.makeText(this, "Username sudah digunakan.", Toast.LENGTH_SHORT).show()
+                if (userPrefs.contains("username_$user")) {
+                    Toast.makeText(
+                        this,
+                        "Username sudah digunakan.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@setOnClickListener
                 }
 
-                // Validasi: Password tidak boleh sama dengan password akun lain (permintaan user)
-                if (pass == registeredPass) {
-                    Toast.makeText(this, "Password tidak boleh sama dengan pengguna lain.", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-                
                 // Validasi tambahan: Password tidak boleh sama dengan username (opsional tapi disarankan)
                 if (pass == user) {
                     Toast.makeText(this, "Password tidak boleh sama dengan username.", Toast.LENGTH_SHORT).show()
@@ -99,12 +121,11 @@ class LoginActivity : AppCompatActivity() {
                 }
 
                 val currentDate = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")).format(Date())
-                
+
                 userPrefs.edit {
-                    putString("reg_username", user)
-                    putString("reg_password", pass)
-                    putString("user_name", user)
-                    putString("user_join_date", currentDate)
+                    putString("username_$user", user)
+                    putString("password_$user", pass)
+                    putString("join_$user", currentDate)
                 }
                 
                 Toast.makeText(this, "Akun berhasil dibuat! Silakan Login", Toast.LENGTH_SHORT).show()

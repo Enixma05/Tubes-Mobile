@@ -7,25 +7,30 @@
     android:background="@color/app_background"
     android:fitsSystemWindows="true">
 
+    <!-- Header Orange - liftOnScroll="false" menjaga warna tetap solid saat scroll -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
+        android:background="@color/primary_orange"
+        app:liftOnScroll="false"
         app:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarProfile"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="@color/primary_orange"
             app:title="Profil Saya"
-            app:titleTextColor="@color/app_text_main"
-            app:navigationIcon="?attr/homeAsUpIndicator" />
+            app:titleTextColor="@color/white"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:navigationIconTint="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -52,8 +57,7 @@
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
                     android:src="@drawable/profile"
-                    app:tint="@color/fox_logo_tint"
-                    android:background="#F0F0F0" />
+                    android:background="@color/app_surface" />
             </androidx.cardview.widget.CardView>
 
             <TextView
@@ -78,7 +82,8 @@
                     android:hint="Nama Lengkap"
                     app:startIconDrawable="@android:drawable/ic_menu_edit"
                     app:boxStrokeColor="@color/primary_orange"
-                    app:hintTextColor="@color/primary_orange">
+                    app:hintTextColor="@color/primary_orange"
+                    app:startIconTint="@color/primary_orange">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etProfileName"
@@ -86,9 +91,7 @@
                         android:layout_height="wrap_content"
                         android:textColor="@color/app_text_main"
                         android:alpha="1"
-                        android:enabled="true"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false" />
+                        android:enabled="false" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -98,17 +101,19 @@
                     android:layout_marginBottom="16dp"
                     android:hint="Nomor Telepon"
                     app:startIconDrawable="@android:drawable/ic_menu_call"
-                    app:boxStrokeColor="@color/primary_orange">
+                    app:boxStrokeColor="@color/primary_orange"
+                    app:hintTextColor="@color/primary_orange"
+                    app:startIconTint="@color/primary_orange">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etProfilePhone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:inputType="phone"
+                        android:digits="0123456789"
                         android:textColor="@color/app_text_main"
                         android:alpha="1"
-                        android:enabled="true"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false" />
+                        android:enabled="false" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -118,7 +123,9 @@
                     android:layout_marginBottom="16dp"
                     android:hint="Email"
                     app:startIconDrawable="@android:drawable/ic_dialog_email"
-                    app:boxStrokeColor="@color/primary_orange">
+                    app:boxStrokeColor="@color/primary_orange"
+                    app:hintTextColor="@color/primary_orange"
+                    app:startIconTint="@color/primary_orange">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etProfileEmail"
@@ -126,9 +133,7 @@
                         android:layout_height="wrap_content"
                         android:textColor="@color/app_text_main"
                         android:alpha="1"
-                        android:enabled="true"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false" />
+                        android:enabled="false" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -137,7 +142,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="24dp"
                     android:hint="Tanggal Bergabung"
-                    app:startIconDrawable="@android:drawable/ic_menu_today">
+                    app:startIconDrawable="@android:drawable/ic_menu_today"
+                    app:boxStrokeColor="@color/primary_orange"
+                    app:hintTextColor="@color/primary_orange"
+                    app:startIconTint="@color/primary_orange">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etProfileJoinDate"
@@ -145,7 +153,7 @@
                         android:layout_height="wrap_content"
                         android:textColor="@color/app_text_main"
                         android:alpha="1"
-                        android:enabled="true"
+                        android:enabled="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false" />
                 </com.google.android.material.textfield.TextInputLayout>

@@ -69,7 +69,7 @@
         android:hint="Password"
         app:startIconDrawable="@android:drawable/ic_lock_idle_lock"
         app:startIconTint="@color/primary_orange"
-        app:passwordToggleEnabled="true"
+        app:endIconMode="password_toggle"
         app:boxStrokeColor="@color/primary_orange"
         app:hintTextColor="@color/primary_orange">
 

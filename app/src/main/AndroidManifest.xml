@@ -27,7 +27,8 @@
         <!-- MAIN -->
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- SETTINGS -->
         <activity
@@ -45,13 +46,15 @@
         <activity
             android:name=".BookDescriptionActivity"
             android:exported="false"
-            android:label="Deskripsi Buku" />
+            android:label="Deskripsi Buku"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- TAMBAH BUKU -->
         <activity
             android:name=".AddBookActivity"
             android:exported="false"
-            android:label="Tambah Buku" />
+            android:label="Tambah Buku"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name="com.canhub.cropper.CropImageActivity"

@@ -38,10 +38,13 @@ class BukuAdapter(
         holder.txtJudul.text = buku.judul
         holder.txtDeskripsi.text = buku.deskripsi
         holder.progressBaca.progress = buku.progress
-        holder.txtProgress.text = "${buku.progress}% selesai"
+
+        // ✅ SET TEKS STATUS (Agar sinkron dengan data)
         holder.txtStatus.text = buku.status
 
-        // Memuat foto cover hasil crop jika ada
+        val halaman = buku.halamanTerakhir.filter { it.isDigit() }.ifEmpty { "0" }
+        holder.txtProgress.text = "$halaman / ${buku.jumlahHalaman} (${buku.progress}%)"
+
         if (!buku.coverUri.isNullOrEmpty()) {
             holder.ivBuku.setImageURI(Uri.parse(buku.coverUri))
             holder.ivBuku.setPadding(0, 0, 0, 0)
