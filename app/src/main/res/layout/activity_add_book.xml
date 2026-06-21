@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/app_background"
     android:fitsSystemWindows="true"
-    tools:context=".AddBookActivity">
+    tools:context=".ui.book.AddBookActivity">
 
     <!-- Header Orange Solid - liftOnScroll="false" & stateListAnimator="@null" menjaga warna tetap solid -->
     <com.google.android.material.appbar.AppBarLayout

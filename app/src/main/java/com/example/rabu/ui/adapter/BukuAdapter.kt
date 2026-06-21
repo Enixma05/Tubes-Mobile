@@ -1,4 +1,4 @@
-package com.example.rabu
+package com.example.rabu.ui.adapter
 
 import android.net.Uri
 import android.view.LayoutInflater
@@ -10,6 +10,8 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
+import com.example.rabu.R
+import com.example.rabu.data.model.Buku
 
 class BukuAdapter(
     private val listBuku: MutableList<Buku>,

@@ -1,4 +1,4 @@
-package com.example.rabu
+package com.example.rabu.data.model
 
 import java.io.Serializable
 

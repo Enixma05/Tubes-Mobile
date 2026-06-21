@@ -1,33 +1,37 @@
-package com.example.rabu
+package com.example.rabu.ui.main
 
-import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.TextView
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.doAfterTextChanged
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.appcompat.widget.PopupMenu
-import org.json.JSONArray
-import org.json.JSONObject
+import androidx.cardview.widget.CardView
+import androidx.core.widget.doAfterTextChanged
+import androidx.recyclerview.widget.*
+import com.example.rabu.R
+import com.example.rabu.data.local.BookRepository
+import com.example.rabu.data.model.Buku
+import com.example.rabu.ui.adapter.BukuAdapter
+import com.example.rabu.ui.book.AddBookActivity
+import com.example.rabu.ui.book.BookDescriptionActivity
+import com.example.rabu.ui.settings.SettingsActivity
+import com.example.rabu.utils.DataHelper
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var recyclerBuku: RecyclerView
     private lateinit var bukuAdapter: BukuAdapter
+    private lateinit var repository: BookRepository
+
     private val listBuku = mutableListOf<Buku>()
     private val displayList = mutableListOf<Buku>()
-    
+
     private var currentSearchQuery = ""
-    private var currentSortMode = "AZ" // Default sort AZ
+    private var currentSortMode = "AZ"
 
     private val addBookLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -43,7 +47,7 @@ class MainActivity : AppCompatActivity() {
                     listBuku.add(0, it)
                     filterAndSort()
                     updateStats()
-                    saveBooks()
+                    repository.saveBooks(listBuku)
                 }
             }
         }
@@ -65,7 +69,7 @@ class MainActivity : AppCompatActivity() {
                     listBuku[position] = updatedBuku
                     filterAndSort()
                     updateStats()
-                    saveBooks()
+                    repository.saveBooks(listBuku)
                 }
             }
         }
@@ -74,11 +78,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Inisialisasi Repository
+        repository = BookRepository(this)
+
         recyclerBuku = findViewById(R.id.recyclerBuku)
         val btnTambah = findViewById<Button>(R.id.btnTambah)
         val btnSettings = findViewById<ImageButton>(R.id.btnSettings)
-        val etSearch = findViewById<android.widget.EditText>(R.id.etSearch)
-        val btnSort = findViewById<androidx.cardview.widget.CardView>(R.id.btnSort)
+        val etSearch = findViewById<EditText>(R.id.etSearch)
+        val btnSort = findViewById<CardView>(R.id.btnSort)
 
         bukuAdapter = BukuAdapter(
             displayList,
@@ -97,7 +104,10 @@ class MainActivity : AppCompatActivity() {
         recyclerBuku.layoutManager = LinearLayoutManager(this)
         recyclerBuku.adapter = bukuAdapter
 
-        loadBooks()
+        // Load data dari repository
+        listBuku.clear()
+        listBuku.addAll(repository.loadBooks())
+        filterAndSort()
 
         etSearch.doAfterTextChanged { text ->
             currentSearchQuery = text.toString().lowercase(Locale.getDefault())
@@ -109,7 +119,7 @@ class MainActivity : AppCompatActivity() {
             popup.menu.add("A-Z")
             popup.menu.add("Z-A")
             popup.menu.add("Tahun Terbit")
-            
+
             popup.setOnMenuItemClickListener { item ->
                 currentSortMode = when (item.title) {
                     "A-Z" -> "AZ"
@@ -135,43 +145,6 @@ class MainActivity : AppCompatActivity() {
         updateStats()
     }
 
-    private fun loadInitialData() {
-        val session = getSharedPreferences("UserSession", MODE_PRIVATE)
-        val currentUser = session.getString("current_user", "User") ?: "User"
-        val sharedPref = getSharedPreferences("BookPrefs", MODE_PRIVATE)
-        
-        // Data sampel awal untuk pengguna baru: Semuanya bernilai 0
-        val initialBooks = listOf(
-            Buku("Atomic Habits", "James Clear", "Penguin (2018)", 320, "Self-Help", "Buku tentang membangun kebiasaan kecil.", 0, "Belum dibaca", "0", null),
-            Buku("Laut Bercerita", "Leila S. Chudori", "KPG (2017)", 379, "Historical Fiction", "Novel tentang perjuangan dan kehilangan.", 0, "Belum dibaca", "0", null),
-            Buku("Rich Dad Poor Dad", "Robert Kiyosaki", "Warner Books (1997)", 336, "Finance", "Buku mengenai pengelolaan keuangan.", 0, "Belum dibaca", "0", null)
-        )
-        
-        listBuku.clear()
-        for (book in initialBooks) {
-            // Ambil progres per user
-            val savedProgress = sharedPref.getInt("${currentUser}_${book.judul}_progress", 0)
-            
-            // Ambil halaman terakhir per user
-            val savedLastRead = sharedPref.getString("${currentUser}_${book.judul}_last_read", "0") ?: "0"
-            
-            // PAKSA STATUS SINKRON DENGAN PROGRES
-            val finalStatus = when {
-                savedProgress <= 0 -> "Belum dibaca"
-                savedProgress >= 100 -> "Sudah dibaca"
-                else -> "Sedang dibaca"
-            }
-
-            listBuku.add(
-                book.copy(
-                    status = finalStatus,
-                    progress = savedProgress,
-                    halamanTerakhir = savedLastRead
-                )
-            )
-        }
-    }
-
     private fun showDeleteDialog(position: Int) {
         val buku = listBuku[position]
         AlertDialog.Builder(this)
@@ -181,7 +154,7 @@ class MainActivity : AppCompatActivity() {
                 listBuku.removeAt(position)
                 filterAndSort()
                 updateStats()
-                saveBooks()
+                repository.saveBooks(listBuku)
             }
             .setNegativeButton("Batal", null)
             .show()
@@ -197,22 +170,20 @@ class MainActivity : AppCompatActivity() {
         val filtered = if (currentSearchQuery.isEmpty()) {
             listBuku.toList()
         } else {
-            listBuku.filter { 
+            listBuku.filter {
                 it.judul.lowercase(Locale.getDefault()).contains(currentSearchQuery) ||
-                it.author.lowercase(Locale.getDefault()).contains(currentSearchQuery) ||
-                it.genre.lowercase(Locale.getDefault()).contains(currentSearchQuery) ||
-                it.penerbit.lowercase(Locale.getDefault()).contains(currentSearchQuery)
+                        it.author.lowercase(Locale.getDefault()).contains(currentSearchQuery) ||
+                        it.genre.lowercase(Locale.getDefault()).contains(currentSearchQuery) ||
+                        it.penerbit.lowercase(Locale.getDefault()).contains(currentSearchQuery)
             }
         }
 
         val sorted = when (currentSortMode) {
             "AZ" -> filtered.sortedBy { it.judul.lowercase(Locale.getDefault()) }
             "ZA" -> filtered.sortedByDescending { it.judul.lowercase(Locale.getDefault()) }
-            "YEAR" -> filtered.sortedByDescending { 
-                // Ekstrak tahun dari string penerbit "Penerbit (Tahun)"
-                val regex = "\\((\\d{4})\\)".toRegex()
-                val match = regex.find(it.penerbit)
-                match?.groupValues?.get(1)?.toIntOrNull() ?: 0
+            "YEAR" -> filtered.sortedByDescending {
+                // Menggunakan DataHelper untuk mengekstrak tahun
+                DataHelper.extractYear(it.penerbit)
             }
             else -> filtered
         }
@@ -220,60 +191,5 @@ class MainActivity : AppCompatActivity() {
         displayList.clear()
         displayList.addAll(sorted)
         bukuAdapter.notifyDataSetChanged()
-    }
-
-    private fun saveBooks() {
-        val session = getSharedPreferences("UserSession", MODE_PRIVATE)
-        val currentUser = session.getString("current_user", "User") ?: "User"
-        val sharedPref = getSharedPreferences("BookPrefs", MODE_PRIVATE)
-        
-        val jsonArray = JSONArray()
-        for (buku in listBuku) {
-            val jsonObject = JSONObject()
-            jsonObject.put("judul", buku.judul)
-            jsonObject.put("author", buku.author)
-            jsonObject.put("penerbit", buku.penerbit)
-            jsonObject.put("jumlahHalaman", buku.jumlahHalaman)
-            jsonObject.put("genre", buku.genre)
-            jsonObject.put("deskripsi", buku.deskripsi)
-            jsonObject.put("progress", buku.progress)
-            jsonObject.put("status", buku.status)
-            jsonObject.put("halamanTerakhir", buku.halamanTerakhir)
-            jsonObject.put("coverUri", buku.coverUri)
-            jsonArray.put(jsonObject)
-        }
-        sharedPref.edit().putString("books_$currentUser", jsonArray.toString()).apply()
-    }
-
-    private fun loadBooks() {
-        val session = getSharedPreferences("UserSession", MODE_PRIVATE)
-        val currentUser = session.getString("current_user", "User") ?: "User"
-        val sharedPref = getSharedPreferences("BookPrefs", MODE_PRIVATE)
-        
-        val jsonString = sharedPref.getString("books_$currentUser", null)
-        if (jsonString != null) {
-            listBuku.clear()
-            val jsonArray = JSONArray(jsonString)
-            for (i in 0 until jsonArray.length()) {
-                val jsonObject = jsonArray.getJSONObject(i)
-                val buku = Buku(
-                    jsonObject.getString("judul"),
-                    jsonObject.getString("author"),
-                    jsonObject.getString("penerbit"),
-                    jsonObject.getInt("jumlahHalaman"),
-                    jsonObject.getString("genre"),
-                    jsonObject.getString("deskripsi"),
-                    jsonObject.getInt("progress"),
-                    jsonObject.getString("status"),
-                    jsonObject.getString("halamanTerakhir"),
-                    if (jsonObject.isNull("coverUri")) null else jsonObject.getString("coverUri")
-                )
-                listBuku.add(buku)
-            }
-            filterAndSort()
-        } else {
-            loadInitialData()
-            saveBooks()
-        }
     }
 }

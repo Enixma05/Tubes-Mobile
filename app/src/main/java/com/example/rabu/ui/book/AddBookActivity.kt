@@ -1,14 +1,20 @@
-package com.example.rabu
+package com.example.rabu.ui.book
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.widget.*
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
-import com.canhub.cropper.*
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
+import com.example.rabu.R
+import com.example.rabu.data.model.Buku
 import com.google.android.material.textfield.TextInputEditText
 
 class AddBookActivity : AppCompatActivity() {
@@ -23,8 +29,6 @@ class AddBookActivity : AppCompatActivity() {
             ivBookCover.setImageURI(selectedImageUri)
             ivBookCover.setPadding(0, 0, 0, 0)
             tvClickPrompt.text = "Ubah Cover"
-        } else {
-            Toast.makeText(this, "Gagal memproses gambar", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -32,15 +36,12 @@ class AddBookActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_book)
 
-        val toolbar: Toolbar = findViewById(R.id.toolbarAddBook)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(findViewById(R.id.toolbarAddBook))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        toolbar.setNavigationOnClickListener { finish() }
+        findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbarAddBook).setNavigationOnClickListener { finish() }
 
         ivBookCover = findViewById(R.id.ivAddBookCover)
         tvClickPrompt = findViewById(R.id.tvClickPrompt)
-
-        val cvAddCover = findViewById<CardView>(R.id.cvAddCover)
 
         val etTitle = findViewById<TextInputEditText>(R.id.etAddTitle)
         val etAuthor = findViewById<TextInputEditText>(R.id.etAddAuthor)
@@ -50,54 +51,47 @@ class AddBookActivity : AppCompatActivity() {
         val etPages = findViewById<TextInputEditText>(R.id.etAddPages)
         val etSynopsis = findViewById<TextInputEditText>(R.id.etAddSynopsis)
 
-        val btnSubmit = findViewById<Button>(R.id.btnSubmitAdd)
-
-        cvAddCover.setOnClickListener {
-            startCropProcess()
+        findViewById<CardView>(R.id.cvAddCover).setOnClickListener {
+            val options = CropImageOptions().apply { guidelines = CropImageView.Guidelines.ON }
+            cropImage.launch(CropImageContractOptions(null, options))
         }
 
-        btnSubmit.setOnClickListener {
+        findViewById<Button>(R.id.btnSubmitAdd).setOnClickListener {
             val title = etTitle.text.toString().trim()
             val author = etAuthor.text.toString().trim()
-            val publisher = etPublisher.text.toString().trim()
-            val year = etYear.text.toString().trim()
-            val genre = etGenre.text.toString().trim()
-            val synopsis = etSynopsis.text.toString().trim()
-            val pages = etPages.text.toString().toIntOrNull() ?: 0
+            val pagesText = etPages.text.toString().trim()
 
-            if (title.isEmpty() || author.isEmpty()) {
-                Toast.makeText(this, "Judul & Author wajib diisi", Toast.LENGTH_SHORT).show()
+            if (title.isEmpty() || author.isEmpty() || pagesText.isEmpty()) {
+                Toast.makeText(this, "Judul, Penulis, dan Halaman wajib diisi", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Buku baru otomatis 0% dan "Belum dibaca"
+            val year = etYear.text.toString().trim()
+            val publisher = etPublisher.text.toString().trim()
+
+            // Format Penerbit (Tahun) yang lebih rapi
+            val formattedPublisher = when {
+                publisher.isNotEmpty() && year.isNotEmpty() -> "$publisher ($year)"
+                year.isNotEmpty() -> "($year)"
+                else -> publisher.ifEmpty { "-" }
+            }
+
             val newBook = Buku(
                 judul = title,
                 author = author,
-                penerbit = if (year.isNotEmpty()) "$publisher ($year)" else publisher,
-                jumlahHalaman = pages,
-                genre = genre,
-                deskripsi = synopsis,
+                penerbit = formattedPublisher,
+                jumlahHalaman = pagesText.toIntOrNull() ?: 0,
+                genre = etGenre.text.toString().trim().ifEmpty { "-" },
+                deskripsi = etSynopsis.text.toString().trim().ifEmpty { "Tidak ada deskripsi." },
                 progress = 0,
                 status = "Belum dibaca",
                 halamanTerakhir = "0",
                 coverUri = selectedImageUri?.toString()
             )
 
-            val intent = Intent()
-            intent.putExtra("NEW_BOOK", newBook)
-            setResult(Activity.RESULT_OK, intent)
-
+            setResult(RESULT_OK, Intent().apply { putExtra("NEW_BOOK", newBook) })
             Toast.makeText(this, "Buku berhasil ditambahkan!", Toast.LENGTH_SHORT).show()
             finish()
         }
-    }
-
-    private fun startCropProcess() {
-        val options = CropImageOptions().apply {
-            guidelines = CropImageView.Guidelines.ON
-            cropMenuCropButtonTitle = "OK"
-        }
-        cropImage.launch(CropImageContractOptions(null, options))
     }
 }

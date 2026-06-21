@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -16,7 +17,7 @@
 
         <!-- LOGIN -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.auth.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,32 +27,32 @@
 
         <!-- MAIN -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <!-- SETTINGS -->
         <activity
-            android:name=".SettingsActivity"
+            android:name=".ui.settings.SettingsActivity"
             android:exported="false"
             android:label="Pengaturan" />
 
         <!-- PROFILE -->
         <activity
-            android:name=".ProfileActivity"
+            android:name=".ui.profile.ProfileActivity"
             android:exported="false"
             android:label="Profil Saya" />
 
         <!-- DETAIL BUKU -->
         <activity
-            android:name=".BookDescriptionActivity"
+            android:name=".ui.book.BookDescriptionActivity"
             android:exported="false"
             android:label="Deskripsi Buku"
             android:windowSoftInputMode="adjustResize" />
 
         <!-- TAMBAH BUKU -->
         <activity
-            android:name=".AddBookActivity"
+            android:name=".ui.book.AddBookActivity"
             android:exported="false"
             android:label="Tambah Buku"
             android:windowSoftInputMode="adjustResize" />

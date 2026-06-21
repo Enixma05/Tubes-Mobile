@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/app_background"
     android:fitsSystemWindows="true"
-    tools:context=".BookDescriptionActivity">
+    tools:context=".ui.book.BookDescriptionActivity">
 
     <!-- APPBAR -->
     <com.google.android.material.appbar.AppBarLayout
