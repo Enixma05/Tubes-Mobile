@@ -11,6 +11,8 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.cardview.widget.CardView
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.*
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.example.rabu.R
 import com.example.rabu.data.local.BookRepository
 import com.example.rabu.data.model.Buku
@@ -47,7 +49,7 @@ class MainActivity : AppCompatActivity() {
                     listBuku.add(0, it)
                     filterAndSort()
                     updateStats()
-                    repository.saveBooks(listBuku)
+                    saveData()
                 }
             }
         }
@@ -69,7 +71,7 @@ class MainActivity : AppCompatActivity() {
                     listBuku[position] = updatedBuku
                     filterAndSort()
                     updateStats()
-                    repository.saveBooks(listBuku)
+                    saveData()
                 }
             }
         }
@@ -104,10 +106,14 @@ class MainActivity : AppCompatActivity() {
         recyclerBuku.layoutManager = LinearLayoutManager(this)
         recyclerBuku.adapter = bukuAdapter
 
-        // Load data dari repository
+        // Load data dari repository secara Asynchronous
         listBuku.clear()
-        listBuku.addAll(repository.loadBooks())
-        filterAndSort()
+        lifecycleScope.launch {
+            val books = repository.loadBooks()
+            listBuku.addAll(books)
+            filterAndSort()
+            updateStats()
+        }
 
         etSearch.doAfterTextChanged { text ->
             currentSearchQuery = text.toString().lowercase(Locale.getDefault())
@@ -154,7 +160,7 @@ class MainActivity : AppCompatActivity() {
                 listBuku.removeAt(position)
                 filterAndSort()
                 updateStats()
-                repository.saveBooks(listBuku)
+                saveData()
             }
             .setNegativeButton("Batal", null)
             .show()
@@ -164,6 +170,12 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvTotalBuku).text = listBuku.size.toString()
         findViewById<TextView>(R.id.tvSedangBaca).text = listBuku.count { it.status == "Sedang dibaca" }.toString()
         findViewById<TextView>(R.id.tvSelesai).text = listBuku.count { it.status == "Sudah dibaca" }.toString()
+    }
+
+    private fun saveData() {
+        lifecycleScope.launch {
+            repository.saveBooks(listBuku)
+        }
     }
 
     private fun filterAndSort() {

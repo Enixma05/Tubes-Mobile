@@ -1,16 +1,23 @@
 package com.example.rabu.data.local
 
 import android.content.Context
+import android.util.Log
+import androidx.core.content.edit
 import com.example.rabu.data.model.Buku
+import com.google.firebase.firestore.FirebaseFirestore
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class BookRepository(context: Context) {
 
     private val sharedPref = context.getSharedPreferences("BookPrefs", Context.MODE_PRIVATE)
     private val prefManager = PrefManager(context)
+    private val firestore = FirebaseFirestore.getInstance()
 
-    fun loadBooks(): MutableList<Buku> {
+    suspend fun loadBooks(): MutableList<Buku> = withContext(Dispatchers.IO) {
         val currentUser = prefManager.getCurrentUser()
         val jsonString = sharedPref.getString("books_$currentUser", null)
         val listBuku = mutableListOf<Buku>()
@@ -38,14 +45,29 @@ class BookRepository(context: Context) {
                 e.printStackTrace()
             }
         } else {
-            val initialData = loadInitialData()
-            saveBooks(initialData)
-            listBuku.addAll(initialData)
+            // Jika lokal kosong, coba ambil dari Firestore (Cloud Backup)
+            val cloudBooks = fetchBooksFromFirestore()
+            if (cloudBooks.isNotEmpty()) {
+                listBuku.addAll(cloudBooks)
+                saveToLocal(listBuku) // Simpan hasil cloud ke lokal
+            } else {
+                val initialData = loadInitialData()
+                saveBooks(initialData)
+                listBuku.addAll(initialData)
+            }
         }
-        return listBuku
+        listBuku
     }
 
-    fun saveBooks(listBuku: List<Buku>) {
+    suspend fun saveBooks(listBuku: List<Buku>) = withContext(Dispatchers.IO) {
+        // 1. Simpan ke Lokal (SharedPref) - Agar tetap bisa dibuka offline
+        saveToLocal(listBuku)
+
+        // 2. Simpan ke Cloud (Firestore) - Asynchronous Sync
+        saveToFirestore(listBuku)
+    }
+
+    private fun saveToLocal(listBuku: List<Buku>) {
         val currentUser = prefManager.getCurrentUser()
         val jsonArray = JSONArray()
         for (buku in listBuku) {
@@ -62,7 +84,61 @@ class BookRepository(context: Context) {
             jsonObject.put("coverUri", buku.coverUri)
             jsonArray.put(jsonObject)
         }
-        sharedPref.edit().putString("books_$currentUser", jsonArray.toString()).apply()
+        sharedPref.edit {
+            putString("books_$currentUser", jsonArray.toString())
+        }
+    }
+
+    private suspend fun saveToFirestore(listBuku: List<Buku>) {
+        val currentUser = prefManager.getCurrentUser()
+        if (currentUser == "Guest") return // Jangan sync jika belum login
+
+        val data = hashMapOf("bookList" to listBuku)
+
+        try {
+            firestore.collection("users")
+                .document(currentUser)
+                .set(data)
+                .await() // Menggunakan coroutines-play-services agar bisa di-await
+            Log.d("Firestore", "Data berhasil disinkronkan ke Cloud")
+        } catch (e: Exception) {
+            Log.e("Firestore", "Gagal sinkronisasi: ${e.message}")
+        }
+    }
+
+    private suspend fun fetchBooksFromFirestore(): List<Buku> {
+        val currentUser = prefManager.getCurrentUser()
+        if (currentUser == "Guest") return emptyList()
+
+        return try {
+            val document = firestore.collection("users")
+                .document(currentUser)
+                .get()
+                .await()
+
+            val list = mutableListOf<Buku>()
+            @Suppress("UNCHECKED_CAST")
+            val data = document.get("bookList") as? List<Map<String, Any>>
+
+            data?.forEach { map ->
+                list.add(Buku(
+                    map["judul"] as String,
+                    map["author"] as String,
+                    map["penerbit"] as String,
+                    (map["jumlahHalaman"] as Long).toInt(),
+                    map["genre"] as String,
+                    map["deskripsi"] as String,
+                    (map["progress"] as Long).toInt(),
+                    map["status"] as String,
+                    map["halamanTerakhir"] as String,
+                    map["coverUri"] as? String
+                ))
+            }
+            list
+        } catch (e: Exception) {
+            Log.e("Firestore", "Gagal mengambil data: ${e.message}")
+            emptyList()
+        }
     }
 
     private fun loadInitialData(): List<Buku> {
