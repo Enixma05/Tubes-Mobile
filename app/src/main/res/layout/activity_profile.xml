@@ -79,38 +79,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:hint="Nama Lengkap"
+                    android:hint="Username"
                     app:startIconDrawable="@android:drawable/ic_menu_edit"
                     app:boxStrokeColor="@color/primary_orange"
                     app:hintTextColor="@color/primary_orange"
                     app:startIconTint="@color/primary_orange">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etProfileName"
+                        android:id="@+id/etUsername"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/app_text_main"
-                        android:alpha="1"
-                        android:enabled="false" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:hint="Nomor Telepon"
-                    app:startIconDrawable="@android:drawable/ic_menu_call"
-                    app:boxStrokeColor="@color/primary_orange"
-                    app:hintTextColor="@color/primary_orange"
-                    app:startIconTint="@color/primary_orange">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etProfilePhone"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="phone"
-                        android:digits="0123456789"
                         android:textColor="@color/app_text_main"
                         android:alpha="1"
                         android:enabled="false" />

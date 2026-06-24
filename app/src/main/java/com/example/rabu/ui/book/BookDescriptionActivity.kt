@@ -4,15 +4,19 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.cardview.widget.CardView
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
 import com.example.rabu.R
 import com.example.rabu.data.local.PrefManager
 import com.example.rabu.data.model.Buku
@@ -26,14 +30,17 @@ class BookDescriptionActivity : AppCompatActivity() {
     private var currentBuku: Buku? = null
     private var itemPosition: Int = -1
 
-    // View Variables
-    private lateinit var tvBookTitle: TextView
-    private lateinit var tvAuthor: TextView
-    private lateinit var tvGenre: TextView
-    private lateinit var tvPublisher: TextView
-    private lateinit var tvPages: TextView
-    private lateinit var tvSynopsis: TextView
+    // View Variables - Informasi Utama
+    private lateinit var etBookTitle: EditText
+    private lateinit var etAuthor: EditText
+    private lateinit var etGenre: EditText
+    private lateinit var etPublisher: EditText
+    private lateinit var etTotalPages: EditText
+    private lateinit var etSynopsis: EditText
     private lateinit var ivBookCover: ImageView
+    private lateinit var btnEditBookInfo: Button
+    
+    // View Variables - Progres & Catatan
     private lateinit var etLastRead: EditText
     private lateinit var sliderRating: Slider
     private lateinit var tvRatingValue: TextView
@@ -43,7 +50,17 @@ class BookDescriptionActivity : AppCompatActivity() {
     private lateinit var tvNoteStatus: TextView
     private lateinit var btnSaveNotes: Button
     private lateinit var btnDeleteNotes: Button
-    private lateinit var llNoteActions: LinearLayout
+
+    private var isEditInfoMode = false
+
+    private val cropImage = registerForActivityResult(CropImageContract()) { result ->
+        if (result.isSuccessful) {
+            val uri = result.uriContent
+            ivBookCover.setImageURI(uri)
+            ivBookCover.setPadding(0, 0, 0, 0)
+            currentBuku = currentBuku?.copy(coverUri = uri?.toString())
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,13 +74,15 @@ class BookDescriptionActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        tvBookTitle = findViewById(R.id.tvBookTitle)
-        tvAuthor = findViewById(R.id.tvAuthor)
-        tvGenre = findViewById(R.id.tvGenre)
-        tvPublisher = findViewById(R.id.tvPublisher)
-        tvPages = findViewById(R.id.tvPages)
-        tvSynopsis = findViewById(R.id.tvSynopsis)
+        etBookTitle = findViewById(R.id.etBookTitle)
+        etAuthor = findViewById(R.id.etAuthor)
+        etGenre = findViewById(R.id.etGenre)
+        etPublisher = findViewById(R.id.etPublisher)
+        etTotalPages = findViewById(R.id.etTotalPages)
+        etSynopsis = findViewById(R.id.etSynopsis)
         ivBookCover = findViewById(R.id.ivBookCover)
+        btnEditBookInfo = findViewById(R.id.btnEditBookInfo)
+
         etLastRead = findViewById(R.id.etLastRead)
         sliderRating = findViewById(R.id.sliderRating)
         tvRatingValue = findViewById(R.id.tvRatingValue)
@@ -73,7 +92,6 @@ class BookDescriptionActivity : AppCompatActivity() {
         tvNoteStatus = findViewById(R.id.tvNoteStatus)
         btnSaveNotes = findViewById(R.id.btnSaveNotes)
         btnDeleteNotes = findViewById(R.id.btnDeleteNotes)
-        llNoteActions = findViewById(R.id.llNoteActions)
     }
 
     private fun setupToolbar() {
@@ -93,30 +111,54 @@ class BookDescriptionActivity : AppCompatActivity() {
             intent.getSerializableExtra("EXTRA_BUKU") as? Buku
         }
 
-        currentBuku?.let { buku ->
-            tvBookTitle.text = buku.judul
-            tvAuthor.text = "Penulis: ${buku.author}"
-            tvGenre.text = "Genre: ${buku.genre}"
-            tvPublisher.text = "Penerbit: ${buku.penerbit}"
-            tvPages.text = "Jumlah Halaman: ${buku.jumlahHalaman}"
-            tvSynopsis.text = buku.deskripsi
+        currentBuku?.let { updateUiWithBook(it) }
+    }
 
-            if (!buku.coverUri.isNullOrEmpty()) {
-                ivBookCover.setImageURI(Uri.parse(buku.coverUri))
-                ivBookCover.setPadding(0, 0, 0, 0)
-            }
+    private fun updateUiWithBook(buku: Buku) {
+        etBookTitle.setText(buku.judul)
+        etAuthor.setText(buku.author)
+        etGenre.setText(buku.genre)
+        etPublisher.setText(buku.penerbit)
+        etTotalPages.setText(buku.jumlahHalaman.toString())
+        etSynopsis.setText(buku.deskripsi)
 
-            loadSavedExtras(buku.judul)
+        if (!buku.coverUri.isNullOrEmpty()) {
+            ivBookCover.setImageURI(Uri.parse(buku.coverUri))
+            ivBookCover.setPadding(0, 0, 0, 0)
+        } else {
+            ivBookCover.setImageResource(android.R.drawable.ic_menu_gallery)
+            ivBookCover.setPadding(30, 30, 30, 30)
         }
+
+        // Load Progress & Rating
+        etLastRead.setText(buku.halamanTerakhir)
+        spinnerStatus.setText(buku.status, false)
+        sliderRating.value = buku.rating
+        tvRatingValue.text = "Rating: ${buku.rating.toInt()}/10"
+        
+        updateInteractionByStatus(buku.status)
+
+        etNotes.setText(buku.notes)
+        updateNoteUiState(buku.notes.isNotEmpty())
     }
 
     private fun setupListeners() {
-        // Dropdown Status
-        val statusOptions = resources.getStringArray(R.array.status_options)
+        btnEditBookInfo.setOnClickListener { toggleEditInfoMode() }
+
+        findViewById<CardView>(R.id.cvBookCover).setOnClickListener {
+            if (isEditInfoMode) {
+                val options = CropImageOptions().apply { guidelines = CropImageView.Guidelines.ON }
+                cropImage.launch(CropImageContractOptions(null, options))
+            }
+        }
+
+        val statusOptions = arrayOf("Belum dibaca", "Sedang dibaca", "Sudah dibaca")
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, statusOptions)
         spinnerStatus.setAdapter(adapter)
 
         etLastRead.doAfterTextChanged { text ->
+            if (spinnerStatus.text.toString() == "Belum dibaca") return@doAfterTextChanged
+            
             val totalPage = currentBuku?.jumlahHalaman ?: 0
             val cleanValue = DataHelper.cleanPageInput(text.toString(), totalPage)
 
@@ -129,26 +171,30 @@ class BookDescriptionActivity : AppCompatActivity() {
             updateStatusByProgress(progress)
 
             currentBuku = currentBuku?.copy(halamanTerakhir = cleanValue, progress = progress)
-            saveToPrefs("last_read", cleanValue)
-            saveToPrefs("progress", progress)
         }
 
         spinnerStatus.setOnItemClickListener { parent, _, position, _ ->
             val selectedStatus = parent.getItemAtPosition(position).toString()
-            currentBuku = currentBuku?.copy(status = selectedStatus)
-            saveToPrefs("status", selectedStatus)
-
-            sliderRating.isEnabled = selectedStatus != "Belum dibaca"
+            updateInteractionByStatus(selectedStatus)
+            
+            if (selectedStatus == "Belum dibaca") {
+                etLastRead.setText("0")
+                sliderRating.value = 0f
+                tvRatingValue.text = "Rating: 0/10"
+                currentBuku = currentBuku?.copy(status = selectedStatus, halamanTerakhir = "0", progress = 0, rating = 0f)
+            } else {
+                currentBuku = currentBuku?.copy(status = selectedStatus)
+            }
         }
 
         sliderRating.addOnChangeListener { _, value, _ ->
             tvRatingValue.text = "Rating: ${value.toInt()}/10"
-            saveToPrefs("rating", value)
+            currentBuku = currentBuku?.copy(rating = value)
         }
 
         btnSaveNotes.setOnClickListener {
             if (btnSaveNotes.text == "Tambahkan catatan" || btnSaveNotes.text == "Edit") {
-                setEditMode(true)
+                setEditNoteMode(true)
             } else {
                 saveNotes()
                 hideKeyboard()
@@ -156,6 +202,49 @@ class BookDescriptionActivity : AppCompatActivity() {
         }
 
         btnDeleteNotes.setOnClickListener { showDeleteConfirmationDialog() }
+    }
+
+    private fun toggleEditInfoMode() {
+        isEditInfoMode = !isEditInfoMode
+        
+        etBookTitle.isEnabled = isEditInfoMode
+        etAuthor.isEnabled = isEditInfoMode
+        etGenre.isEnabled = isEditInfoMode
+        etPublisher.isEnabled = isEditInfoMode
+        etTotalPages.isEnabled = isEditInfoMode
+        etSynopsis.isEnabled = isEditInfoMode
+
+        if (isEditInfoMode) {
+            btnEditBookInfo.text = "Simpan Perubahan"
+            etBookTitle.requestFocus()
+        } else {
+            btnEditBookInfo.text = "Edit Informasi Buku"
+            saveBookInfo()
+            Toast.makeText(this, "Informasi buku diperbarui!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun saveBookInfo() {
+        val newTotalPages = etTotalPages.text.toString().toIntOrNull() ?: 0
+        val lastRead = etLastRead.text.toString().toIntOrNull() ?: 0
+        val newProgress = DataHelper.calculateProgress(lastRead, newTotalPages)
+
+        currentBuku = currentBuku?.copy(
+            judul = etBookTitle.text.toString(),
+            author = etAuthor.text.toString(),
+            genre = etGenre.text.toString(),
+            penerbit = etPublisher.text.toString(),
+            jumlahHalaman = newTotalPages,
+            deskripsi = etSynopsis.text.toString(),
+            progress = newProgress
+        )
+        updateStatusByProgress(newProgress)
+    }
+
+    private fun updateInteractionByStatus(status: String) {
+        val isNotBelumDibaca = status != "Belum dibaca"
+        sliderRating.isEnabled = isNotBelumDibaca
+        etLastRead.isEnabled = isNotBelumDibaca
     }
 
     private fun updateStatusByProgress(progress: Int) {
@@ -167,46 +256,13 @@ class BookDescriptionActivity : AppCompatActivity() {
         if (spinnerStatus.text.toString() != statusBaru) {
             spinnerStatus.setText(statusBaru, false)
             currentBuku = currentBuku?.copy(status = statusBaru)
-            saveToPrefs("status", statusBaru)
+            updateInteractionByStatus(statusBaru)
         }
-    }
-
-    private fun loadSavedExtras(bookTitle: String) {
-        val user = prefManager.getCurrentUser()
-        val prefs = getSharedPreferences("BookPrefs", MODE_PRIVATE)
-
-        val savedLastRead = prefs.getString("${user}_${bookTitle}_last_read", "0") ?: "0"
-        etLastRead.setText(savedLastRead)
-
-        val savedStatus = prefs.getString("${user}_${bookTitle}_status", "Belum dibaca") ?: "Belum dibaca"
-        spinnerStatus.setText(savedStatus, false)
-
-        val savedRating = prefs.getFloat("${user}_${bookTitle}_rating", 0f)
-        sliderRating.value = savedRating
-        tvRatingValue.text = "Rating: ${savedRating.toInt()}/10"
-        sliderRating.isEnabled = savedStatus != "Belum dibaca"
-
-        val savedNotes = prefs.getString("${user}_${bookTitle}_notes", "") ?: ""
-        etNotes.setText(savedNotes)
-        updateNoteUiState(savedNotes.isNotEmpty())
-    }
-
-    private fun saveToPrefs(key: String, value: Any) {
-        val user = prefManager.getCurrentUser()
-        val title = currentBuku?.judul ?: ""
-        val prefs = getSharedPreferences("BookPrefs", MODE_PRIVATE).edit()
-
-        when (value) {
-            is String -> prefs.putString("${user}_${title}_$key", value)
-            is Int -> prefs.putInt("${user}_${title}_$key", value)
-            is Float -> prefs.putFloat("${user}_${title}_$key", value)
-        }
-        prefs.apply()
     }
 
     private fun saveNotes() {
         val notes = etNotes.text.toString().trim()
-        saveToPrefs("notes", notes)
+        currentBuku = currentBuku?.copy(notes = notes)
         updateNoteUiState(notes.isNotEmpty())
         Toast.makeText(this, "Catatan disimpan!", Toast.LENGTH_SHORT).show()
     }
@@ -226,7 +282,7 @@ class BookDescriptionActivity : AppCompatActivity() {
         }
     }
 
-    private fun setEditMode(editable: Boolean) {
+    private fun setEditNoteMode(editable: Boolean) {
         tilNotes.isVisible = true
         etNotes.isEnabled = editable
         btnSaveNotes.text = if (editable) "Simpan" else "Edit"
@@ -242,7 +298,7 @@ class BookDescriptionActivity : AppCompatActivity() {
             .setTitle("Hapus Catatan")
             .setMessage("Yakin ingin menghapus catatan ini?")
             .setPositiveButton("Hapus") { _, _ ->
-                saveToPrefs("notes", "")
+                currentBuku = currentBuku?.copy(notes = "")
                 etNotes.setText("")
                 updateNoteUiState(false)
             }
@@ -267,7 +323,6 @@ class BookDescriptionActivity : AppCompatActivity() {
         finish()
     }
 
-    // GANTI BAGIAN @Deprecated onBackPressed dengan ini:
     override fun onSupportNavigateUp(): Boolean {
         finishWithResult()
         return true

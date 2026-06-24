@@ -12,5 +12,7 @@ data class Buku(
     val progress: Int,
     val status: String,
     val halamanTerakhir: String,
-    val coverUri: String?
+    val coverUri: String?,
+    val rating: Float = 0f,
+    val notes: String = ""
 ) : Serializable

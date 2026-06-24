@@ -11,18 +11,17 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.example.rabu.R
 import com.example.rabu.data.local.PrefManager
 import com.example.rabu.ui.main.MainActivity
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
 
-    private var isLoginMode = true
     private lateinit var prefManager: PrefManager
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefManager = PrefManager(this)
+        auth = FirebaseAuth.getInstance()
 
         // Cek sesi login otomatis
         if (prefManager.isLoggedIn()) {
@@ -34,76 +33,43 @@ class LoginActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_login)
 
-        val etUsername = findViewById<EditText>(R.id.etUsername)
+        val etEmail = findViewById<EditText>(R.id.etUsername)
         val etPassword = findViewById<EditText>(R.id.etPassword)
-        val btnAction = findViewById<Button>(R.id.btnLogin)
-        val btnToggle = findViewById<Button>(R.id.btnSignup)
-        val tvTitleSub = findViewById<TextView>(R.id.tvTitleSub)
+        val btnLogin = findViewById<Button>(R.id.btnLogin)
+        val btnToRegister = findViewById<Button>(R.id.btnSignup)
 
-        btnToggle.setOnClickListener {
-            isLoginMode = !isLoginMode
-            if (isLoginMode) {
-                btnAction.text = "Login"
-                btnToggle.text = "Belum punya akun? Daftar sekarang"
-                tvTitleSub.text = "Silakan masuk ke akun Anda"
-            } else {
-                btnAction.text = "Sign In"
-                btnToggle.text = "Login sekarang"
-                tvTitleSub.text = "Buat akun baru Anda"
-            }
+        // Navigasi ke Halaman Register
+        btnToRegister.setOnClickListener {
+            val intent = Intent(this, RegisterActivity::class.java)
+            startActivity(intent)
         }
 
-        btnAction.setOnClickListener {
-            val user = etUsername.text.toString().trim()
+        btnLogin.setOnClickListener {
+            val email = etEmail.text.toString().trim()
             val pass = etPassword.text.toString().trim()
 
-            if (user.isEmpty() || pass.isEmpty()) {
-                Toast.makeText(this, "Isi username dan password", Toast.LENGTH_SHORT).show()
+            if (email.isEmpty() || pass.isEmpty()) {
+                Toast.makeText(this, "Isi email dan password", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            if (isLoginMode) {
-                // Logika LOGIN
-                val registeredPass = prefManager.getRegisteredPassword(user)
+            // --- LOGIKA LOGIN FIREBASE ---
+            auth.signInWithEmailAndPassword(email, pass)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        val user = auth.currentUser
+                        prefManager.setLoginStatus(true, user?.uid)
 
-                if (registeredPass == null) {
-                    Toast.makeText(this, "Akun tidak ditemukan. Silakan daftar dulu.", Toast.LENGTH_SHORT).show()
-                } else if (pass == registeredPass) {
-                    prefManager.setLoginStatus(true, user)
+                        // Terapkan tema user
+                        AppCompatDelegate.setDefaultNightMode(prefManager.getThemeMode())
 
-                    // Terapkan tema user
-                    AppCompatDelegate.setDefaultNightMode(prefManager.getThemeMode())
-
-                    Toast.makeText(this, "Login Berhasil", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
-                } else {
-                    Toast.makeText(this, "Password salah", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Login Berhasil", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
+                    } else {
+                        Toast.makeText(this, "Login Gagal: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    }
                 }
-            } else {
-                // Logika DAFTAR (Sign In)
-                if (prefManager.isUsernameExists(user)) {
-                    Toast.makeText(this, "Username sudah digunakan.", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                if (pass == user) {
-                    Toast.makeText(this, "Password tidak boleh sama dengan username.", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                val currentDate = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")).format(Date())
-                prefManager.registerUser(user, pass, currentDate)
-
-                Toast.makeText(this, "Akun berhasil dibuat! Silakan Login", Toast.LENGTH_SHORT).show()
-
-                // Kembalikan ke mode login otomatis
-                isLoginMode = true
-                btnAction.text = "Login"
-                btnToggle.text = "Belum punya akun? Daftar sekarang"
-                tvTitleSub.text = "Silakan masuk ke akun Anda"
-                etPassword.setText("")
-            }
         }
     }
 }

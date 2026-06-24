@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import com.example.rabu.R
 import com.example.rabu.data.local.BookRepository
+import com.example.rabu.data.local.PrefManager
 import com.example.rabu.data.model.Buku
 import com.example.rabu.ui.adapter.BukuAdapter
 import com.example.rabu.ui.book.AddBookActivity
@@ -28,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerBuku: RecyclerView
     private lateinit var bukuAdapter: BukuAdapter
     private lateinit var repository: BookRepository
+    private lateinit var prefManager: PrefManager
+    private lateinit var tvHeaderTitle: TextView
 
     private val listBuku = mutableListOf<Buku>()
     private val displayList = mutableListOf<Buku>()
@@ -80,14 +83,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Inisialisasi Repository
+        prefManager = PrefManager(this)
         repository = BookRepository(this)
 
+        tvHeaderTitle = findViewById(R.id.tvHeaderTitle)
         recyclerBuku = findViewById(R.id.recyclerBuku)
         val btnTambah = findViewById<Button>(R.id.btnTambah)
         val btnSettings = findViewById<ImageButton>(R.id.btnSettings)
         val etSearch = findViewById<EditText>(R.id.etSearch)
         val btnSort = findViewById<CardView>(R.id.btnSort)
+
+        updateHeaderTitle()
 
         bukuAdapter = BukuAdapter(
             displayList,
@@ -125,12 +131,14 @@ class MainActivity : AppCompatActivity() {
             popup.menu.add("A-Z")
             popup.menu.add("Z-A")
             popup.menu.add("Tahun Terbit")
+            popup.menu.add("Progres Tertinggi")
 
             popup.setOnMenuItemClickListener { item ->
                 currentSortMode = when (item.title) {
                     "A-Z" -> "AZ"
                     "Z-A" -> "ZA"
                     "Tahun Terbit" -> "YEAR"
+                    "Progres Tertinggi" -> "PROGRESS"
                     else -> "AZ"
                 }
                 filterAndSort()
@@ -149,6 +157,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateStats()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateHeaderTitle()
+    }
+
+    private fun updateHeaderTitle() {
+        val name = prefManager.getProfileName("User")
+        tvHeaderTitle.text = "Rak Buku $name"
     }
 
     private fun showDeleteDialog(position: Int) {
@@ -194,9 +212,9 @@ class MainActivity : AppCompatActivity() {
             "AZ" -> filtered.sortedBy { it.judul.lowercase(Locale.getDefault()) }
             "ZA" -> filtered.sortedByDescending { it.judul.lowercase(Locale.getDefault()) }
             "YEAR" -> filtered.sortedByDescending {
-                // Menggunakan DataHelper untuk mengekstrak tahun
                 DataHelper.extractYear(it.penerbit)
             }
+            "PROGRESS" -> filtered.sortedByDescending { it.progress }
             else -> filtered
         }
 

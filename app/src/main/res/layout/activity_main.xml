@@ -33,6 +33,23 @@
                 android:src="@drawable/img_fox_line"
                 app:tint="@color/white" />
 
+            <!-- Nama Rak Buku -->
+            <TextView
+                android:id="@+id/tvHeaderTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/ivMainLogo"
+                android:layout_toStartOf="@id/btnSettings"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                android:text="Rak Buku"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end" />
+
             <!-- Tombol Settings (Logo Gear) di Kanan -->
             <ImageButton
                 android:id="@+id/btnSettings"

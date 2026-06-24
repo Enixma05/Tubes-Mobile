@@ -20,8 +20,7 @@ import com.google.android.material.textfield.TextInputEditText
 class ProfileActivity : AppCompatActivity() {
 
     private lateinit var ivProfile: ImageView
-    private lateinit var etName: TextInputEditText
-    private lateinit var etPhone: TextInputEditText
+    private lateinit var etUsername: TextInputEditText
     private lateinit var etEmail: TextInputEditText
     private lateinit var etJoinDate: TextInputEditText
     private lateinit var btnEditProfile: Button
@@ -49,8 +48,7 @@ class ProfileActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         ivProfile = findViewById(R.id.ivProfile)
-        etName = findViewById(R.id.etProfileName)
-        etPhone = findViewById(R.id.etProfilePhone)
+        etUsername = findViewById(R.id.etUsername)
         etEmail = findViewById(R.id.etProfileEmail)
         etJoinDate = findViewById(R.id.etProfileJoinDate)
         btnEditProfile = findViewById(R.id.btnEditProfile)
@@ -75,12 +73,9 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun loadProfileData() {
-        val currentUser = prefManager.getCurrentUser()
-
-        etName.setText(prefManager.getProfileName(currentUser))
-        etPhone.setText(prefManager.getProfilePhone())
+        etUsername.setText(prefManager.getProfileName("Nama Pengguna"))
         etEmail.setText(prefManager.getProfileEmail())
-        etJoinDate.setText(prefManager.getJoinDate(currentUser))
+        etJoinDate.setText(prefManager.getJoinDate())
 
         val img = prefManager.getProfileImage()
         if (img != null) {
@@ -96,21 +91,19 @@ class ProfileActivity : AppCompatActivity() {
     private fun toggleEditMode() {
         isEditMode = !isEditMode
 
-        etName.isEnabled = isEditMode
-        etPhone.isEnabled = isEditMode
+        etUsername.isEnabled = isEditMode
         etEmail.isEnabled = isEditMode
         etJoinDate.isEnabled = false
 
         if (isEditMode) {
             btnEditProfile.text = "Simpan Perubahan"
-            etName.requestFocus()
+            etUsername.requestFocus()
             val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(etName, InputMethodManager.SHOW_IMPLICIT)
+            imm.showSoftInput(etUsername, InputMethodManager.SHOW_IMPLICIT)
         } else {
             if (saveProfileInfo()) {
                 btnEditProfile.text = "Edit Profil"
-                etName.isEnabled = false
-                etPhone.isEnabled = false
+                etUsername.isEnabled = false
                 etEmail.isEnabled = false
                 Toast.makeText(this, "Profil diperbarui!", Toast.LENGTH_SHORT).show()
             } else {
@@ -120,16 +113,11 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun saveProfileInfo(): Boolean {
-        val name = etName.text.toString().trim()
-        val phone = etPhone.text.toString().trim()
+        val name = etUsername.text.toString().trim()
         val email = etEmail.text.toString().trim()
 
         if (name.isEmpty()) {
-            etName.error = "Nama tidak boleh kosong"
-            return false
-        }
-        if (phone.isNotEmpty() && !phone.matches(Regex("\\d+"))) {
-            etPhone.error = "Nomor telepon hanya boleh berisi angka"
+            etUsername.error = "Nama tidak boleh kosong"
             return false
         }
         if (email.isNotEmpty() && !email.endsWith("@gmail.com")) {
@@ -137,7 +125,7 @@ class ProfileActivity : AppCompatActivity() {
             return false
         }
 
-        prefManager.saveProfileInfo(name, phone, email)
+        prefManager.saveProfileInfo(name, email)
         return true
     }
 }

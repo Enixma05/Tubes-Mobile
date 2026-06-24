@@ -37,7 +37,9 @@ class BookRepository(context: Context) {
                         jsonObject.getInt("progress"),
                         jsonObject.getString("status"),
                         jsonObject.getString("halamanTerakhir"),
-                        if (jsonObject.isNull("coverUri")) null else jsonObject.getString("coverUri")
+                        if (jsonObject.isNull("coverUri")) null else jsonObject.getString("coverUri"),
+                        jsonObject.optDouble("rating", 0.0).toFloat(),
+                        jsonObject.optString("notes", "")
                     )
                     listBuku.add(buku)
                 }
@@ -49,7 +51,7 @@ class BookRepository(context: Context) {
             val cloudBooks = fetchBooksFromFirestore()
             if (cloudBooks.isNotEmpty()) {
                 listBuku.addAll(cloudBooks)
-                saveToLocal(listBuku) // Simpan hasil cloud ke lokal
+                saveToLocal(listBuku)
             } else {
                 val initialData = loadInitialData()
                 saveBooks(initialData)
@@ -60,10 +62,7 @@ class BookRepository(context: Context) {
     }
 
     suspend fun saveBooks(listBuku: List<Buku>) = withContext(Dispatchers.IO) {
-        // 1. Simpan ke Lokal (SharedPref) - Agar tetap bisa dibuka offline
         saveToLocal(listBuku)
-
-        // 2. Simpan ke Cloud (Firestore) - Asynchronous Sync
         saveToFirestore(listBuku)
     }
 
@@ -82,6 +81,8 @@ class BookRepository(context: Context) {
             jsonObject.put("status", buku.status)
             jsonObject.put("halamanTerakhir", buku.halamanTerakhir)
             jsonObject.put("coverUri", buku.coverUri)
+            jsonObject.put("rating", buku.rating)
+            jsonObject.put("notes", buku.notes)
             jsonArray.put(jsonObject)
         }
         sharedPref.edit {
@@ -91,7 +92,7 @@ class BookRepository(context: Context) {
 
     private suspend fun saveToFirestore(listBuku: List<Buku>) {
         val currentUser = prefManager.getCurrentUser()
-        if (currentUser == "Guest") return // Jangan sync jika belum login
+        if (currentUser == "Guest") return
 
         val data = hashMapOf("bookList" to listBuku)
 
@@ -99,7 +100,7 @@ class BookRepository(context: Context) {
             firestore.collection("users")
                 .document(currentUser)
                 .set(data)
-                .await() // Menggunakan coroutines-play-services agar bisa di-await
+                .await()
             Log.d("Firestore", "Data berhasil disinkronkan ke Cloud")
         } catch (e: Exception) {
             Log.e("Firestore", "Gagal sinkronisasi: ${e.message}")
@@ -131,7 +132,9 @@ class BookRepository(context: Context) {
                     (map["progress"] as Long).toInt(),
                     map["status"] as String,
                     map["halamanTerakhir"] as String,
-                    map["coverUri"] as? String
+                    map["coverUri"] as? String,
+                    (map["rating"] as? Double)?.toFloat() ?: 0f,
+                    map["notes"] as? String ?: ""
                 ))
             }
             list
@@ -142,22 +145,10 @@ class BookRepository(context: Context) {
     }
 
     private fun loadInitialData(): List<Buku> {
-        val currentUser = prefManager.getCurrentUser()
-        val initialBooks = listOf(
+        return listOf(
             Buku("Atomic Habits", "James Clear", "Penguin (2018)", 320, "Self-Help", "Buku tentang membangun kebiasaan kecil.", 0, "Belum dibaca", "0", null),
             Buku("Laut Bercerita", "Leila S. Chudori", "KPG (2017)", 379, "Historical Fiction", "Novel tentang perjuangan dan kehilangan.", 0, "Belum dibaca", "0", null),
             Buku("Rich Dad Poor Dad", "Robert Kiyosaki", "Warner Books (1997)", 336, "Finance", "Buku mengenai pengelolaan keuangan.", 0, "Belum dibaca", "0", null)
         )
-
-        return initialBooks.map { book ->
-            val savedProgress = sharedPref.getInt("${currentUser}_${book.judul}_progress", 0)
-            val savedLastRead = sharedPref.getString("${currentUser}_${book.judul}_last_read", "0") ?: "0"
-            val finalStatus = when {
-                savedProgress <= 0 -> "Belum dibaca"
-                savedProgress >= 100 -> "Sudah dibaca"
-                else -> "Sedang dibaca"
-            }
-            book.copy(status = finalStatus, progress = savedProgress, halamanTerakhir = savedLastRead)
-        }
     }
 }

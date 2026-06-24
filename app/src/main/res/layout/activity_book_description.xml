@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,9 +8,7 @@
     android:fitsSystemWindows="true"
     tools:context=".ui.book.BookDescriptionActivity">
 
-    <!-- APPBAR -->
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/primary_orange">
@@ -21,17 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/primary_orange"
-            app:navigationIcon="?attr/homeAsUpIndicator">
-
-            <TextView
-                android:id="@+id/tvToolbarTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Deskripsi Buku"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
-                android:textStyle="bold"/>
-        </androidx.appcompat.widget.Toolbar>
+            app:navigationIcon="?attr/homeAsUpIndicator" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -44,24 +31,33 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp">
 
-            <!-- COVER + INFO -->
+            <!-- Cover & Main Info -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
                 <androidx.cardview.widget.CardView
-                    android:layout_width="120dp"
-                    android:layout_height="180dp"
-                    app:cardCornerRadius="8dp">
+                    android:id="@+id/cvBookCover"
+                    android:layout_width="110dp"
+                    android:layout_height="160dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
 
                     <ImageView
                         android:id="@+id/ivBookCover"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:scaleType="centerCrop"/>
+                        android:scaleType="centerCrop"
+                        android:src="@android:drawable/ic_menu_gallery"
+                        android:padding="30dp"
+                        android:background="@color/app_surface"/>
                 </androidx.cardview.widget.CardView>
 
                 <LinearLayout
@@ -70,195 +66,251 @@
                     android:layout_marginStart="16dp"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tvBookTitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="?attr/colorOnBackground"
-                        android:textSize="20sp"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:id="@+id/tvAuthor"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Penulis: Nama Penulis"
-                        android:textColor="?attr/colorOnBackground"
-                        android:textSize="12sp"
-                        android:lineSpacingExtra="2dp"/>
-
-                    <TextView
-                        android:id="@+id/tvGenre"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Genre: Fantasy, Action"
-                        android:textColor="@color/primary_orange"
-                        android:textSize="12sp"
-                        android:lineSpacingExtra="2dp"/>
-
-                    <TextView
-                        android:id="@+id/tvPublisher"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Penerbit: -"
-                        android:textColor="?attr/colorOnBackground"
-                        android:textSize="12sp"
-                        android:lineSpacingExtra="2dp"/>
-                    <TextView
-                        android:id="@+id/tvPages"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Jumlah Halaman: -"
-                        android:textColor="?attr/colorOnBackground"
-                        android:textSize="12sp"
-                        android:lineSpacingExtra="2dp"/>
-
-                    <!-- Last Read -->
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Terakhir Dibaca"
-                        app:boxStrokeColor="@color/primary_orange"
-                        app:boxStrokeWidth="2dp"
-                        app:boxStrokeWidthFocused="3dp">
-
+                        android:hint="Judul Buku"
+                        app:boxStrokeColor="@color/primary_orange">
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etLastRead"
+                            android:id="@+id/etBookTitle"
                             android:layout_width="match_parent"
-                            android:layout_height="48dp"
+                            android:layout_height="wrap_content"
+                            android:enabled="false"
+                            android:textSize="14sp"
                             android:textColor="?attr/colorOnBackground"
-                            android:textSize="12sp"/>
+                            android:textStyle="bold" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Status -->
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Status Baca"
-                        app:boxStrokeColor="@color/primary_orange"
-                        app:boxStrokeWidth="2dp"
-                        app:boxStrokeWidthFocused="3dp">
-
-                        <AutoCompleteTextView
-                            android:id="@+id/spinnerStatus"
+                        android:layout_marginTop="8dp"
+                        android:hint="Penulis"
+                        app:boxStrokeColor="@color/primary_orange">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAuthor"
                             android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:textColor="?attr/colorOnBackground"
-                            android:textSize="12sp"/>
-
+                            android:layout_height="wrap_content"
+                            android:enabled="false"
+                            android:textSize="13sp" />
                     </com.google.android.material.textfield.TextInputLayout>
-                    <!-- Rating -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/tvRatingValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="@color/primary_orange"
-                            android:text="Rating: 0/10"/>
-
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/sliderRating"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:valueFrom="0"
-                            android:valueTo="10"
-                            android:value="1"
-                            android:stepSize="1"
-                            app:thumbColor="@color/primary_orange"
-                            app:trackColorActive="@color/primary_orange"
-                            app:trackColorInactive="#BDBDBD"/>
-                    </LinearLayout>
-
                 </LinearLayout>
             </LinearLayout>
 
-            <TextView
+            <!-- Secondary Info -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Sinopsis"
-                android:textColor="?attr/colorOnBackground"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
+                android:layout_marginTop="16dp"
+                android:orientation="vertical">
 
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Genre"
+                    app:boxStrokeColor="@color/primary_orange">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etGenre"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:textSize="13sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Penerbit"
+                    app:boxStrokeColor="@color/primary_orange">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPublisher"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:textSize="13sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Total Halaman"
+                    app:boxStrokeColor="@color/primary_orange">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etTotalPages"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:inputType="number"
+                        android:textSize="13sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Sinopsis"
+                    app:boxStrokeColor="@color/primary_orange">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etSynopsis"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:minLines="3"
+                        android:gravity="top"
+                        android:textSize="13sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEditBookInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="12dp"
+                    android:text="Edit Informasi Buku"
+                    android:backgroundTint="@color/primary_orange"
+                    android:textAllCaps="false"
+                    app:cornerRadius="8dp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="20dp"
+                android:background="#DDDDDD" />
+
+            <!-- Reading Progress Section -->
             <TextView
-                android:id="@+id/tvSynopsis"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Progres Membaca"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="12dp"/>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="?attr/colorOnBackground"/>
+                android:orientation="vertical">
 
-            <!-- CATATAN -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Status Baca"
+                    app:boxStrokeColor="@color/primary_orange">
+                    <AutoCompleteTextView
+                        android:id="@+id/spinnerStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="13sp"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Halaman Terakhir"
+                    app:boxStrokeColor="@color/primary_orange">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etLastRead"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:textSize="13sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Rating -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
+                    <TextView
+                        android:id="@+id/tvRatingValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rating: 0/10"
+                        android:textColor="@color/primary_orange"
+                        android:textStyle="bold"/>
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderRating"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:valueFrom="0"
+                        android:valueTo="10"
+                        android:stepSize="1"
+                        app:thumbColor="@color/primary_orange"
+                        app:trackColorActive="@color/primary_orange" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Notes Section -->
             <TextView
-                android:id="@+id/tvNoteTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:text="Catatan Saya"
-                android:textColor="?attr/colorOnBackground"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:textSize="16sp"/>
 
             <TextView
                 android:id="@+id/tvNoteStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Belum ada catatan"/>
+                android:text="Belum ada catatan"
+                android:textSize="12sp"
+                android:alpha="0.6"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilNotes"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:visibility="gone"
                 app:boxStrokeColor="@color/primary_orange">
-
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etNotes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minLines="5"
+                    android:minLines="4"
                     android:gravity="top"
-                    android:textColor="?attr/colorOnBackground"/>
+                    android:textSize="13sp"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <LinearLayout
-                android:id="@+id/llNoteActions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="12dp">
-
-                <Button
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSaveNotes"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="Tambahkan catatan"
-                    android:backgroundTint="@color/primary_orange"
-                    android:textColor="@android:color/white"/>
-
-                <Button
+                    android:textAllCaps="false"
+                    android:backgroundTint="@color/primary_orange" />
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnDeleteNotes"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Hapus"
-                    android:layout_marginStart="8dp"
-                    android:backgroundTint="#D32F2F"
-                    android:textColor="@android:color/white"
-                    android:visibility="gone"/>
+                    android:textColor="#D32F2F"
+                    android:visibility="gone" />
             </LinearLayout>
 
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
