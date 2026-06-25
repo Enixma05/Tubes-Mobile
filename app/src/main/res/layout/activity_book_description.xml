@@ -18,7 +18,17 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/primary_orange"
-            app:navigationIcon="?attr/homeAsUpIndicator" />
+            app:navigationIcon="?attr/homeAsUpIndicator">
+
+            <TextView
+                android:id="@+id/tvToolbarTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Deskripsi Buku"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+        </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -82,20 +92,67 @@
                             android:textStyle="bold" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:hint="Penulis"
-                        app:boxStrokeColor="@color/primary_orange">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etAuthor"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:enabled="false"
-                            android:textSize="13sp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:layout_marginTop="8dp"
+                            android:hint="Status Baca"
+                            app:boxStrokeColor="@color/primary_orange">
+                            <AutoCompleteTextView
+                                android:id="@+id/spinnerStatus"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="13sp"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:hint="Halaman Terakhir"
+                            app:boxStrokeColor="@color/primary_orange">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etLastRead"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:textSize="13sp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <!-- Rating -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="8dp">
+                            <TextView
+                                android:id="@+id/tvRatingValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Rating: 0/10"
+                                android:textColor="@color/primary_orange"
+                                android:textStyle="bold"/>
+                            <com.google.android.material.slider.Slider
+                                android:id="@+id/sliderRating"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:valueFrom="0"
+                                android:valueTo="10"
+                                android:stepSize="1"
+                                app:thumbColor="@color/primary_orange"
+                                app:trackColorActive="@color/primary_orange" />
+                        </LinearLayout>
+                    </LinearLayout>
+
                 </LinearLayout>
             </LinearLayout>
 
@@ -110,12 +167,28 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:hint="Penulis"
+                    app:boxStrokeColor="@color/primary_orange">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etAuthor"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:textSize="13sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:hint="Genre"
                     app:boxStrokeColor="@color/primary_orange">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etGenre"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
                         android:enabled="false"
                         android:textSize="13sp" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -179,81 +252,6 @@
                     app:cornerRadius="8dp" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="20dp"
-                android:background="#DDDDDD" />
-
-            <!-- Reading Progress Section -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Progres Membaca"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_marginBottom="12dp"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Status Baca"
-                    app:boxStrokeColor="@color/primary_orange">
-                    <AutoCompleteTextView
-                        android:id="@+id/spinnerStatus"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="13sp"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:hint="Halaman Terakhir"
-                    app:boxStrokeColor="@color/primary_orange">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etLastRead"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:textSize="13sp" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Rating -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="8dp">
-                    <TextView
-                        android:id="@+id/tvRatingValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rating: 0/10"
-                        android:textColor="@color/primary_orange"
-                        android:textStyle="bold"/>
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/sliderRating"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:valueFrom="0"
-                        android:valueTo="10"
-                        android:stepSize="1"
-                        app:thumbColor="@color/primary_orange"
-                        app:trackColorActive="@color/primary_orange" />
-                </LinearLayout>
-            </LinearLayout>
-
             <!-- Notes Section -->
             <TextView
                 android:layout_width="wrap_content"
@@ -300,7 +298,8 @@
                     android:layout_weight="1"
                     android:text="Tambahkan catatan"
                     android:textAllCaps="false"
-                    android:backgroundTint="@color/primary_orange" />
+                    android:backgroundTint="@color/primary_orange"
+                    app:cornerRadius="8dp"/>
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnDeleteNotes"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
