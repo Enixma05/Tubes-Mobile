@@ -50,7 +50,7 @@
                 android:singleLine="true"
                 android:ellipsize="end" />
 
-            <!-- Tombol Settings (Logo Gear) di Kanan -->
+            <!-- Tombol Settings -->
             <ImageButton
                 android:id="@+id/btnSettings"
                 android:layout_width="40dp"
