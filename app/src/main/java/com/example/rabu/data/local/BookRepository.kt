@@ -47,15 +47,10 @@ class BookRepository(context: Context) {
                 e.printStackTrace()
             }
         } else {
-            // Jika lokal kosong, coba ambil dari Firestore (Cloud Backup)
             val cloudBooks = fetchBooksFromFirestore()
             if (cloudBooks.isNotEmpty()) {
                 listBuku.addAll(cloudBooks)
                 saveToLocal(listBuku)
-            } else {
-                val initialData = loadInitialData()
-                saveBooks(initialData)
-                listBuku.addAll(initialData)
             }
         }
         listBuku
@@ -142,13 +137,5 @@ class BookRepository(context: Context) {
             Log.e("Firestore", "Gagal mengambil data: ${e.message}")
             emptyList()
         }
-    }
-
-    private fun loadInitialData(): List<Buku> {
-        return listOf(
-            Buku("Atomic Habits", "James Clear", "Penguin (2018)", 320, "Self-Help", "Buku tentang membangun kebiasaan kecil.", 0, "Belum dibaca", "0", null),
-            Buku("Laut Bercerita", "Leila S. Chudori", "KPG (2017)", 379, "Historical Fiction", "Novel tentang perjuangan dan kehilangan.", 0, "Belum dibaca", "0", null),
-            Buku("Rich Dad Poor Dad", "Robert Kiyosaki", "Warner Books (1997)", 336, "Finance", "Buku mengenai pengelolaan keuangan.", 0, "Belum dibaca", "0", null)
-        )
     }
 }

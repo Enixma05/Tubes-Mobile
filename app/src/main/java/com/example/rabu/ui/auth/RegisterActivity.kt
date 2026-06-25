@@ -51,13 +51,14 @@ class RegisterActivity : AppCompatActivity() {
                         val user = auth.currentUser
                         val currentDate = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")).format(Date())
 
-                        prefManager.setLoginStatus(true, user?.uid)
+                        prefManager.setLoginStatus(false, user?.uid)
                         prefManager.saveJoinDate(currentDate)
                         prefManager.saveProfileInfo(username, email)
 
-                        Toast.makeText(this, "Akun berhasil dibuat!", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this, MainActivity::class.java))
-                        finishAffinity()
+                        auth.signOut()
+
+                        Toast.makeText(this, "Akun berhasil dibuat! Silakan login.", Toast.LENGTH_SHORT).show()
+                        finish()
                     } else {
                         Toast.makeText(this, "Gagal: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                     }
